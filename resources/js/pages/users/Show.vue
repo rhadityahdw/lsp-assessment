@@ -1,12 +1,9 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import InputError from '@/components/InputError.vue';
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { BreadcrumbItem, User, Role } from '@/types';
+import { UserCircle, Mail, Shield } from 'lucide-vue-next';
+import ProfileCard from '@/components/ProfileCard.vue';
 
 const props = defineProps<{
     user: User;
@@ -23,47 +20,90 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: route('users.index'),
     },
     {
-        title: 'Edit ',
-        href: route('users.edit', props.user.id),
+        title: props.user.name,
+        href: route('users.show', props.user.id),
+    }
+];
+
+const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+const getRoleBadgeClass = (role: string) => {
+    switch (role) {
+        case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        case 'asesi': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        case 'asesor': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+};
+
+// Prepare data for ProfileCard
+const infoSections = [
+    {
+        icon: Mail,
+        label: 'Email Address',
+        value: props.user.email
+    },
+    {
+        icon: Shield,
+        label: 'User Role',
+        value: capitalizeFirstLetter(props.user.role?.name)
+    }
+];
+
+const detailSections = [
+    {
+        title: 'Account Information',
+        items: [
+            {
+                label: 'Account ID',
+                value: props.user.id
+            },
+            {
+                label: 'Created At',
+                value: new Date(props.user.created_at).toLocaleDateString()
+            },
+            {
+                label: 'Last Updated',
+                value: new Date(props.user.updated_at).toLocaleDateString()
+            }
+        ]
+    }
+];
+
+const actions = [
+    {
+        label: 'Edit User',
+        route: route('users.edit', props.user.id),
+        variant: 'outline',
+        hoverClass: 'hover:bg-primary-50 hover:text-primary-600 transition-colors'
+    },
+    {
+        label: 'Back to Users',
+        route: route('users.index'),
+        variant: 'outline',
+        hoverClass: 'hover:bg-gray-100 transition-colors'
     }
 ];
 </script>
 
 <template>
-    <Head :title="`User: ${props.user.name}`" />
+    <Head :title="`${props.user.name}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="py-6 md:py-12">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
-                <Card>
-                    <CardHeader class="flex justify-between items-center">
-                        <CardTitle class="text-xl md:text-2xl font-bold">User Details</CardTitle>
-                        <div class="flex space-x-2">
-                            <Link :href="route('users.edit', props.user.id)">
-                                <Button variant="outline">Edit User</Button>
-                            </Link>
-                            <Link :href="route('users.index')">
-                                <Button variant="outline">Back to Users</Button>
-                            </Link>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="space-y-2">
-                                <Label for="name">Name</Label>
-                                <p class="font-reguler">{{ props.user.name }}</p>
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="email">Email</Label>
-                                <p class="font-reguler">{{ props.user.email }}</p>
-                            </div>
-                            <div class="space-y-2">
-                                <Label for="role">Role</Label>
-                                <p class="font-reguler">{{ props.user.role?.name }}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                <ProfileCard
+                    title="User Details"
+                    :entity="props.user"
+                    :avatar-icon="UserCircle"
+                    :badge-text="capitalizeFirstLetter(props.user.role?.name)"
+                    :badge-class="getRoleBadgeClass(props.user.role?.name)"
+                    :info-sections="infoSections"
+                    :detail-sections="detailSections"
+                    :actions="actions"
+                />
             </div>
         </div>
     </AppLayout>

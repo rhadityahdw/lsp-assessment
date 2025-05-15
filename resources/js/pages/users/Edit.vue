@@ -51,7 +51,7 @@ const handleUpdateSubmit = (form: any) => {
                         mode="edit"
                         :initial-data="user"
                         cancel-route="users.index"
-                        submit-label="Update User"
+                        submit-label="Update"
                         @submit="handleUpdateSubmit"
                     />
                 </Card>

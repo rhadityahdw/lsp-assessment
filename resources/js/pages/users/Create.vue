@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
 import { BreadcrumbItem, Role } from '@/types';
 import UserForm from '@/components/UserForm.vue';
 
-const props = defineProps<{
+defineProps<{
     roles: Role[];
 }>();
 
