@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import InputError from '@/components/InputError.vue';
 import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectGroup, SelectItem, SelectItemText, SelectLabel, SelectSeparator, SelectTrigger, } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BreadcrumbItem, Role } from '@/types';
 
 defineProps<{
@@ -53,35 +53,35 @@ const submit = () => {
                         <CardTitle class="text-xl md:text-2xl font-bold">Create User</CardTitle>
                     </CardHeader>
                     <form @submit.prevent="submit" class="space-y-6">
-                    <CardContent>
-                        <CardDescription class="mb-6">
-                            Fill in the information below to create a new user account. All fields are required.
-                        </CardDescription>
+                        <CardContent class="space-y-6">
+                            <CardDescription class="mb-6">
+                                Fill in the information below to create a new user account. All fields are required.
+                            </CardDescription>
                             <div class="grid gap-2">
                                 <Label for="name">Name</Label>
-                                <Input v-model="form.name" id="name" class="form-input" placeholder="Enter user's full name" />
+                                <Input v-model="form.name" id="name" class="form-input" placeholder="Enter user's full name" tabindex="1" />
                                 <InputError :message="form.errors.name"/>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="email">Email</Label>
-                                <Input v-model="form.email" id="email" type="email" placeholder="user@example.com" autocomplete="email" />
+                                <Input v-model="form.email" id="email" type="email" placeholder="user@example.com" autocomplete="email" tabindex="2" />
                                 <InputError :message="form.errors.email" />
                             </div>
                             <div class="grid gap-2">
                                 <Label for="password">Password</Label>
-                                <Input v-model="form.password" id="password" type="password" autocomplete="new-password" placeholder="Enter a strong password" />
+                                <Input v-model="form.password" id="password" type="password" autocomplete="new-password" placeholder="Enter a strong password" tabindex="3" />
                                 <InputError :message="form.errors.password"/>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="password_confirmation">Confirm Password</Label>
-                                <Input v-model="form.password_confirmation" id="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm your password" />
+                                <Input v-model="form.password_confirmation" id="password_confirmation" type="password" autocomplete="new-password" placeholder="Confirm your password" tabindex="4" />
                                 <InputError :message="form.errors.password_confirmation"/>
                             </div>
                             <div class="grid gap-2">
                                 <Label for="role">Role</Label>
                                 <Select v-model="form.role_id" id="role">
-                                    <SelectTrigger class="w-full">
-                                        <SelectLabel>Select a role</SelectLabel>
+                                    <SelectTrigger class="w-full" tabindex="5">
+                                        <SelectValue placeholder="Select a role" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem v-if="roles" v-for="role in roles" :key="role.id" :value="role.id">
@@ -93,15 +93,15 @@ const submit = () => {
                             </div>
                         </CardContent>
                         <CardFooter class="flex items-center justify-end">
-                            <CardAction class="rounded-b-lg flex justify-end space-x-2">
+                            <CardAction class="rounded-b-lg flex justify-end gap-2">
                                 <Link :href="route('users.index')">
-                                    <Button type="button" variant="outline">Cancel</Button>
+                                    <Button type="button" variant="outline" tabindex="6">Cancel</Button>
                                 </Link>
-                                <Button type="submit" variant="default" :disabled="form.processing">Submit</Button>
+                                <Button type="submit" variant="default" :disabled="form.processing" tabindex="7">Submit</Button>
                             </CardAction>
                         </CardFooter>
                     </form>
-                </Card>                
+                </Card>
             </div>
         </div>
     </AppLayout>

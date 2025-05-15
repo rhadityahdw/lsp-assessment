@@ -1,15 +1,17 @@
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import InputError from '@/components/InputError.vue';
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCaption, TableCell, TableEmpty, TableFooter, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent } from '@/components/ui/card';
+import { TableCell, TableRow } from '@/components/ui/table';
 import { BreadcrumbItem, User } from '@/types';
+import ActionButtonsComponent from '@/components/ActionButtonsComponent.vue';
+import DataTableComponent from '@/components/DataTableComponent.vue';
+import PageHeaderComponent from '@/components/PageHeaderComponent.vue';
+import SearchComponent from '@/components/SearchComponent.vue';
+import { ref, computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
     users: User[];
 }>();
 
@@ -18,50 +20,114 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Users', href: route('users.index') },
 ];
 
+const searchQuery = ref('');
+
+/**
+ * Filter users by search query.
+ */
+const filteredUsers = computed(() => {
+    if (!searchQuery.value) return props.users;
+    
+    const query = searchQuery.value.toLowerCase();
+    return props.users.filter(user => 
+        user.name.toLowerCase().includes(query) || 
+        user.email.toLowerCase().includes(query) ||
+        user.role.name.toLowerCase().includes(query)
+    );
+});
+
+/**
+ * Determine if we should show the empty search message
+ */
+const showEmptySearchMessage = computed(() => {
+    return searchQuery.value.length > 0 && filteredUsers.value.length === 0;
+});
+
+/**
+ * Determine if we should show the empty data message
+ */
+const showEmptyDataMessage = computed(() => {
+    return props.users.length === 0;
+});
+
+/**
+ * Capitalize first letter of string.
+ */
+const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+/**
+ * Badge role for user roles.
+ */
+const getBadgeRole = (role: string) => {
+    switch (role) {
+        case 'admin': return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        case 'asesi': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        case 'asesor': return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+}
+
+/**
+ * const tableHeaders = Table headers for users table.
+ */
+const tableHeaders = ['Name', 'Email', 'Role', ''];
 </script>
 
 <template>
-    <Head title="List Users" />
+    <Head title="Daftar Pengguna" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="py-6 md:py-12">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
                 <Card>
-                    <CardHeader class="flex justify-between items-center">
-                        <CardTitle class="text-xl md:text-2xl font-bold">List Users</CardTitle>
+                    <PageHeaderComponent title="Daftar Pengguna">
                         <Link :href="route('users.create')">
                             <Button>Create</Button>
                         </Link>
-                    </CardHeader>
+                    </PageHeaderComponent>
                     <CardContent>
-                        <div v-if="users.length === 0" class="text-center py-8 text-gray-500">
+                        <div class="mb-6 max-w-md">
+                            <SearchComponent 
+                                v-model="searchQuery"
+                                placeholder="Cari berdasarkan nama, email, atau role..."
+                            />
+                        </div>
+
+                        <!-- Tampilkan pesan pencarian kosong -->
+                        <div v-if="showEmptySearchMessage" class="text-center py-8 text-gray-500">
+                            Tidak ada pengguna yang cocok dengan pencarian Anda.
+                        </div>
+
+                        <!-- Tampilkan pesan data kosong -->
+                        <div v-else-if="showEmptyDataMessage" class="text-center py-8 text-gray-500">
                             Belum ada pengguna yang terdaftar. Silakan tambahkan pengguna baru.
                         </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Email</TableCell>
-                                    <TableCell>Role</TableCell>
-                                    <TableCell class="text-right">Action</TableCell>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                <TableRow v-for="user in users" :key="user.id">
-                                    <TableCell>{{ user.name }}</TableCell>
-                                    <TableCell>{{ user.email }}</TableCell>
-                                    <TableCell>{{ user.role.name }}</TableCell>
-                                    <TableCell class="text-right flex space-x-3 justify-end">
-                                        <Link :href="route('users.edit', user.id)">
-                                            <Button variant="outline">Edit</Button>
-                                        </Link>
-                                        <Link :href="route('users.show', user.id)">
-                                            <Button variant="outline">Show</Button>
-                                        </Link>
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
+
+                        <!-- Tampilkan tabel jika ada data -->
+                        <DataTableComponent 
+                            v-else
+                            :headers="tableHeaders" 
+                            :items="filteredUsers"
+                        >
+                            <TableRow v-for="user in filteredUsers" :key="user.id">
+                                <TableCell>{{ user.name }}</TableCell>
+                                <TableCell>{{ user.email }}</TableCell>
+                                <TableCell>
+                                    <span :class="['px-2 py-1 text-xs font-medium rounded-full', getBadgeRole(user.role.name)]">
+                                        {{ capitalizeFirstLetter(user.role.name) }}
+                                    </span>
+                                </TableCell>
+                                <TableCell class="text-right">
+                                    <ActionButtonsComponent 
+                                        :edit-route="route('users.edit', user.id)" 
+                                        :show-route="route('users.show', user.id)" 
+                                        :delete-route="route('users.destroy', user.id)" 
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        </DataTableComponent>
                     </CardContent> 
                 </Card>
             </div>
