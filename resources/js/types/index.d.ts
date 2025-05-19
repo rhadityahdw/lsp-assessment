@@ -42,4 +42,37 @@ export interface Role {
     name: string;
 }
 
+export interface Scheme {
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    document_path: Text;
+    summary: Text;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Unit {
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    scheme_id: number;
+    scheme: Scheme;
+    pre_assessments: PreAssessment[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface PreAssessment {
+    id: number;
+    unit_id: number;
+    unit: Unit;
+    question: string;
+    expected_answer: 'yes' | 'no';
+    created_at: string;
+    updated_at: string;
+}
+
 export type BreadcrumbItemType = BreadcrumbItem;
