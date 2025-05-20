@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('profiles', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->string('nik');
-            $table->enum('gender', ['Laki-laki', 'Perempuan']);
+            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
+            $table->string('nik')->unique();
+            $table->enum('gender', ['male', 'female']);
             $table->date('date_of_birth');
             $table->string('place_of_birth');
             $table->text('address');
@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('education');
             $table->string('job_title');
             $table->string('company_name')->nullable();
-            $table->string('company_address')->nullable();
-            $table->string('company_phone_number')->nullable();
+            $table->text('company_address')->nullable();
+            $table->string('company_phone')->nullable();
             $table->string('company_email')->nullable();
             $table->timestamps();
         });
