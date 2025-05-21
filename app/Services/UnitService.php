@@ -50,7 +50,7 @@ class UnitService
                 $this->createPreAssessments($unit, $pre_assessments);
             }
 
-            return $unit->load('preAssessments');
+            return $unit->load('pre_assessments');
         });
     }
 
@@ -76,24 +76,25 @@ class UnitService
                     ->filter()
                     ->toArray();
 
-                $unit->preAssessments()
+                $unit->pre_assessments()
                     ->whereNotIn('id', $existingIds)
                     ->delete();
 
                 // Update atau create yang baru
                 foreach ($pre_assessments as $preAssessment) {
-                    if (!empty($preAssessment['id'])) {
+                    if (isset($preAssessment['id'])) {
                         // Update existing
                         PreAssessment::where('id', $preAssessment['id'])
                             ->update($preAssessment);
                     } else {
                         // Create new
-                        $unit->preAssessments()->create($preAssessment);
+                        $unit->pre_assessments()->create($preAssessment);
                     }
                 }
+                $this->createPreAssessments($unit, $pre_assessments);
             }
 
-            return $unit->load('preAssessments');
+            return $unit->load('pre_asssessments');
         });
     }
 
@@ -109,7 +110,7 @@ class UnitService
             $unit = Unit::findOrFail($id);
 
             // Hapus assessment
-            $unit->preAssessments()->delete();
+            $unit->pre_assessments()->delete();
 
             return $unit->delete();
         });

@@ -28,5 +28,9 @@ Route::get('skema', function () {
     return Inertia::render('Scheme');
 })->name('skema');
 
+Route::get('profile', function () {
+    return Inertia::render('UserProfile');
+})->name('profile');
+
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

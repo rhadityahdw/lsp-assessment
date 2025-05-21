@@ -49,7 +49,7 @@ const activeItem = computed(() => {
   }
   
   // Default to home if no match found
-  return 'home';
+  return '';
 });
 
 // Close mobile menu when navigating
@@ -112,7 +112,7 @@ const user = {
                                 <p class="text-sm text-gray-500">{{ user.email }}</p>
                                 <p class="text-xs text-cyan-600 mt-1 font-medium">{{ user.role }}</p>
                             </div>
-                            <Link :href="route('profil')">
+                            <Link :href="route('profile')">
                                 <DropdownMenuItem class="cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50 rounded-md mt-1">
                                     <UserCircle class="h-4 w-4 mr-2 text-gray-500" />
                                     Profil Saya
@@ -169,7 +169,7 @@ const user = {
                         </div>
                     </div>
                     <div class="mt-3 space-y-1 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100">
-                        <Link :href="route('profil')">
+                        <Link :href="route('profile')">
                             <Button variant="ghost" class="w-full justify-start text-gray-700 hover:bg-cyan-50 hover:text-cyan-600 px-4">
                                 <UserCircle class="h-4 w-4 mr-2 text-gray-500" />
                                 Profil Saya

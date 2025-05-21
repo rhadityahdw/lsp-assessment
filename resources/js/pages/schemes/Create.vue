@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card, CardContent, CardFooter, CardHeader, CardTitle
 } from '@/components/ui/card';
-import { Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, Trash2 } from 'lucide-vue-next';
 import { BreadcrumbItem, Unit } from '@/types';
 
 const props = defineProps<{
@@ -33,16 +33,7 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-interface SchemeForm extends Record<string, any>  {
-  code: string;
-  name: string;
-  type: string;
-  units: number[];
-  document_path: string;
-  summary: string;
-}
-
-const form = useForm<SchemeForm>({
+const form = useForm({
   code: '',
   name: '',
   type: '',
@@ -51,28 +42,32 @@ const form = useForm<SchemeForm>({
   summary: '',
 });
 
-const handleUnitSelection = (unitId: number, checked: boolean) => {
+const selectedUnits = ref<Unit[]>([]);
+
+const handleUnitSelection = (unitId: number, checked: boolean): void => {
   if (checked) {
-    // Tambahkan unit ke dalam form
-    if (!form.units.includes(unitId)) {
-      form.units = [...form.units, unitId];
+    if (!form.units.some(id => id === unitId)) {
+      form.units.push(unitId);
+      const foundUnit = props.units.find(unit => unit.id === unitId);
+      if (foundUnit) {
+        selectedUnits.value.push(foundUnit);
+      }
     }
   } else {
-    // Hapus unit dari dalam form
-    form.units = form.units.filter(id => id !== unitId);
+    const index = form.units.indexOf(unitId);
+    if (index !== -1) {
+      form.units.splice(index, 1);
+      selectedUnits.value = selectedUnits.value.filter(unit => unit.id !== unitId);
+    }
   }
-}
+};
 
-const isUnitSelected = (unitId: number) => {
-  console
+const isUnitSelected = (unitId: number): boolean => {
   return form.units.includes(unitId);
 };
 
-const getSelectedUnits = (): Unit[] => {
-  return props.units.filter(unit => form.units.includes(unit.id));
-};
-
 const submit = (): void => {
+  console.log('Form data:', form);
   form.post(route('schemes.store'));
 };
 </script>
@@ -151,30 +146,6 @@ const submit = (): void => {
                 </div>
                 <div v-else class="text-center py-4 text-gray-500">
                   Tidak ada unit kompetensi yang tersedia.
-                </div>
-              </div>
-            </CardContent>
-            
-            <!-- Tampilkan Unit yang Terpilih -->
-            <CardHeader v-if="getSelectedUnits().length > 0">
-              <CardTitle class="text-md font-medium">Unit Kompetensi Terpilih</CardTitle>
-            </CardHeader>
-            <CardContent v-if="getSelectedUnits().length > 0">
-              <div class="border rounded-md divide-y">
-                <div v-for="unit in getSelectedUnits()" :key="unit.id" class="p-3 flex justify-between items-center">
-                  <div>
-                    <p class="font-medium">{{ unit.code }}</p>
-                    <p class="text-sm text-gray-500">{{ unit.name }}</p>
-                    <p class="text-xs text-gray-400">{{ unit.type }}</p>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    @click="handleUnitSelection(unit.id, false)" 
-                    type="button"
-                  >
-                    <Trash2 class="h-4 w-4 text-red-500" />
-                  </Button>
                 </div>
               </div>
             </CardContent>
