@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\ProfileData;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -9,41 +10,46 @@ use Illuminate\Support\Facades\DB;
 class ProfileService
 {
     /**
-     * Create a new profile for user.
-     *
+     * Create a new profile for the authenticated user
+     * 
      * @param User $user
-     * @param array $data
+     * @param ProfileData $profileData
      * @return Profile
      */
-    public function createProfile(User $user, array $data)
+    public function createProfile(User $user, ProfileData $data)
     {
         return DB::transaction(function () use ($user, $data) {
-            if ($user->profile) {
+            if($user->profile) {
                 throw new \Exception('User already has a profile');
             }
 
-            return Profile::create(array_merge($data, ['user_id' => $user->id]));
+            $profileData = $data->toArray();
+
+            return Profile::create($profileData);
         });
     }
 
     /**
-     * Update profile for user.
-     *
+     * Update a profile for the authenticated user
+     * 
      * @param Profile $profile
-     * @param array $data
+     * @param ProfileData $data
      * @return Profile
      */
-    public function updateProfile(Profile $profile, array $data)
+    public function updateProfile(Profile $profile, ProfileData $data)
     {
         return DB::transaction(function () use ($profile, $data) {
-            $profile->update($data);
+            $profileData = $data->toArray();
+
+            $profile->update($profileData);
+
             return $profile->refresh();
         });
     }
 
     /**
-     * Delete profile for user.
-     *
+     * Delete a profile
+     * 
      * @param Profile $profile
      * @return bool
      */
@@ -53,5 +59,4 @@ class ProfileService
             return $profile->delete();
         });
     }
-
 }

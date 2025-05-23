@@ -23,6 +23,11 @@ const mainNavItems: NavItem[] = [
         title: 'Units',
         href: '/units',
         icon: Folder,
+    },
+    {
+        title: 'Skema',
+        href: 'schemes',
+        icon: Folder,
     }
 ];
 

@@ -42,6 +42,26 @@ export interface Role {
     name: string;
 }
 
+export interface Profile {
+    id: number;
+    user_id: number;
+    user: User;
+    nik: string;
+    gender: 'male' | 'female';
+    date_of_birth: string;
+    place_of_birth: string;
+    address: string;
+    phone_number: string;
+    education: string;
+    job_title: string;
+    company_name: string | null;
+    company_address: string | null;
+    company_phone: string | null;
+    company_email: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 export interface Scheme {
     id: number;
     code: string;

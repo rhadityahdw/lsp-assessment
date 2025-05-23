@@ -37,7 +37,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 <Card class="mb-6">
                     <CardHeader class="pb-3">
                         <div class="flex items-center justify-between">
-                            <CardTitle class="text-xl md:text-2xl font-bold">Detail Unit</CardTitle>
+                            <CardTitle class="text-xl md:text-2xl font-bold">{{ unit.name }}</CardTitle>
                             <Link :href="route('units.edit', unit.id)">
                                 <Button size="sm">
                                     <Pencil class="mr-2 h-4 w-4" />
@@ -47,7 +47,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                             <div class="space-y-2">
                                 <div class="text-sm text-gray-500">Kode Unit</div>
                                 <div class="font-medium flex items-center">
@@ -58,10 +58,6 @@ const breadcrumbs: BreadcrumbItem[] = [
                             <div class="space-y-2">
                                 <div class="text-sm text-gray-500">Nama Unit</div>
                                 <div class="font-medium">{{ unit.name }}</div>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="text-sm text-gray-500">Tipe Unit</div>
-                                <div class="font-medium">{{ unit.type }}</div>
                             </div>
                         </div>
                     </CardContent>

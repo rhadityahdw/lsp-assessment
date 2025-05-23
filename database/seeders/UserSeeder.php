@@ -29,6 +29,37 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role_id' => 3, // asesor
             ],
+            // Tambahan user dengan role asesi
+            [
+                'name' => 'Budi Santoso',
+                'email' => 'budi@example.com',
+                'password' => Hash::make('password'),
+                'role_id' => 2, // asesi
+            ],
+            [
+                'name' => 'Dewi Lestari',
+                'email' => 'dewi@example.com',
+                'password' => Hash::make('password'),
+                'role_id' => 2, // asesi
+            ],
+            [
+                'name' => 'Eko Prasetyo',
+                'email' => 'eko@example.com',
+                'password' => Hash::make('password'),
+                'role_id' => 2, // asesi
+            ],
+            [
+                'name' => 'Fitri Handayani',
+                'email' => 'fitri@example.com',
+                'password' => Hash::make('password'),
+                'role_id' => 2, // asesi
+            ],
+            [
+                'name' => 'Gunawan Wibowo',
+                'email' => 'gunawan@example.com',
+                'password' => Hash::make('password'),
+                'role_id' => 2, // asesi
+            ],
         ];
 
         foreach ($users as $user) {

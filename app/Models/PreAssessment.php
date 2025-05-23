@@ -9,9 +9,6 @@ class PreAssessment extends Model
 {
     use HasFactory;
 
-    // Add this line to specify the table name
-    protected $table = 'pre_assessments';
-
     protected $fillable = [
         'unit_id',
         'question',

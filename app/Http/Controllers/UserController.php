@@ -43,11 +43,17 @@ class UserController extends Controller
             'role_id' => 'required|exists:roles,id',
         ]);
 
-        User::create([
+        
+
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role_id' => $request->role_id,
+        ]);
+
+        Inertia::render('users/Show', [
+            'permissions' => $user->getAllPermissions(),
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully');

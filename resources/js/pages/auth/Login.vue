@@ -31,6 +31,10 @@ const submit = () => {
     <AuthBase title="Log in to your account" description="Enter your email and password below to log in">
         <Head title="Log in" />
 
+        <div class="flex justify-center mb-6">
+            <img src="/images/logo.png" alt="LSP Logo" class="h-16" />
+        </div>
+
         <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
             {{ status }}
         </div>
@@ -38,7 +42,7 @@ const submit = () => {
         <form @submit.prevent="submit" class="flex flex-col gap-6">
             <div class="grid gap-6">
                 <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
+                    <Label for="email">Alamat Email</Label>
                     <Input
                         id="email"
                         type="email"
@@ -54,9 +58,9 @@ const submit = () => {
 
                 <div class="grid gap-2">
                     <div class="flex items-center justify-between">
-                        <Label for="password">Password</Label>
+                        <Label for="password">Kata Sandi</Label>
                         <TextLink v-if="canResetPassword" :href="route('password.request')" class="text-sm" :tabindex="5">
-                            Forgot password?
+                            Lupa kata sandi?
                         </TextLink>
                     </div>
                     <Input
@@ -71,13 +75,6 @@ const submit = () => {
                     <InputError :message="form.errors.password" />
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <Label for="remember" class="flex items-center space-x-3">
-                        <Checkbox id="remember" v-model="form.remember" :tabindex="3" />
-                        <span>Remember me</span>
-                    </Label>
-                </div>
-
                 <Button type="submit" class="mt-4 w-full" :tabindex="4" :disabled="form.processing">
                     <LoaderCircle v-if="form.processing" class="h-4 w-4 animate-spin" />
                     Log in
@@ -85,9 +82,25 @@ const submit = () => {
             </div>
 
             <div class="text-center text-sm text-muted-foreground">
-                Don't have an account?
+                Belum memiliki akun?
                 <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>
             </div>
         </form>
     </AuthBase>
 </template>
+
+<style scoped>
+/* Tambahkan gaya kustom untuk tema warna cyan */
+:deep(.auth-card) {
+    border-color: #e0f2fe;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+:deep(.auth-title) {
+    color: #0e7490;
+}
+
+:deep(.auth-description) {
+    color: #0891b2;
+}
+</style>

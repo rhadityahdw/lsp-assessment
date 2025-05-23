@@ -9,12 +9,13 @@ import {
 } from "./ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { User, Menu, X, Home, FileText, Award, Settings, LogOut, UserCircle } from "lucide-vue-next";
+import { User2, Menu, X, Home, FileText, Award, Settings, LogOut, UserCircle } from "lucide-vue-next";
 import NavItem from "./ui/nav-item.vue";
 import UserMenuButton from "./ui/user-menu-button.vue";
 import { Link, usePage } from '@inertiajs/vue3';
+import { SharedData, User } from "@/types";
 
-const page = usePage();
+const page = usePage<SharedData>();
 const currentRoute = computed(() => page.url);
 
 const mobileMenuOpen = ref<boolean>(false);
@@ -30,12 +31,13 @@ const navItems = [
   { id: 'skema', label: 'Skema Sertifikasi', icon: Award, href: route('skema')  },
 ];
 
+const authUser = computed(() => page.props.auth.user as User);
+
 // Determine active item based on current route
 const activeItem = computed(() => {
   const currentUrl = currentRoute.value;
   
   for (const item of navItems) {
-    // Extract path from href for comparison - add safety checks
     try {
       if (item.href) {
         const itemPath = new URL(item.href).pathname;
@@ -55,13 +57,6 @@ const activeItem = computed(() => {
 // Close mobile menu when navigating
 const setActive = (): void => {
   mobileMenuOpen.value = false;
-};
-
-// Dummy user data
-const user = {
-  name: "Ahmad Fauzi",
-  email: "ahmad.fauzi@example.com",
-  role: "Peserta"
 };
 </script>
 
@@ -104,15 +99,15 @@ const user = {
                     <!-- User Menu -->
                     <DropdownMenu>
                         <DropdownMenuTrigger class="focus:outline-none">
-                            <UserMenuButton :user="user" />
+                            <UserMenuButton :user="authUser" />
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" class="w-56 p-1">
                             <div class="p-2 mb-1 bg-gray-50 rounded-md">
-                                <p class="font-medium text-gray-800">{{ user.name }}</p>
-                                <p class="text-sm text-gray-500">{{ user.email }}</p>
-                                <p class="text-xs text-cyan-600 mt-1 font-medium">{{ user.role }}</p>
+                                <p class="font-medium text-gray-800">{{ authUser.name }}</p>
+                                <p class="text-sm text-gray-500">{{ authUser.email }}</p>
+                                <p class="text-xs text-cyan-600 mt-1 font-medium">{{ authUser.role.name }}</p>
                             </div>
-                            <Link :href="route('profile')">
+                            <Link :href="route('profile.index')">
                                 <DropdownMenuItem class="cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50 rounded-md mt-1">
                                     <UserCircle class="h-4 w-4 mr-2 text-gray-500" />
                                     Profil Saya
@@ -159,13 +154,13 @@ const user = {
                     <div class="flex items-center space-x-3 p-2">
                         <Avatar class="h-10 w-10 border border-gray-200 shadow-sm">
                             <AvatarFallback class="bg-gradient-to-br from-cyan-50 to-cyan-100 text-cyan-700">
-                                <User class="h-5 w-5" />
+                                <User2 class="h-5 w-5" />
                             </AvatarFallback>
                         </Avatar>
                         <div>
-                            <p class="font-medium text-gray-800">{{ user.name }}</p>
-                            <p class="text-xs text-cyan-600">{{ user.role }}</p>
-                            <p class="text-xs text-gray-500">{{ user.email }}</p>
+                            <p class="font-medium text-gray-800">{{ authUser.name }}</p>
+                            <p class="text-xs text-cyan-600">{{ authUser.role_id }}</p>
+                            <p class="text-xs text-gray-500">{{ authUser.email }}</p>
                         </div>
                     </div>
                     <div class="mt-3 space-y-1 bg-white rounded-lg overflow-hidden shadow-sm border border-gray-100">
