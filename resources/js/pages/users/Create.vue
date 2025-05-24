@@ -2,11 +2,11 @@
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { BreadcrumbItem, Role } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import UserForm from '@/components/UserForm.vue';
 
 defineProps<{
-    roles: Role[];
+    roles: string[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [

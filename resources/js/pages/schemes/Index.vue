@@ -1,92 +1,112 @@
-<script setup>
-import { ref, computed } from 'vue';
+<script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { PlusCircle, Search } from 'lucide-vue-next';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { TableRow, TableCell } from '@/components/ui/table';
+import PageHeaderComponent from '@/components/PageHeaderComponent.vue';
+import SearchComponent from '@/components/SearchComponent.vue';
 import ActionButtonsComponent from '@/components/ActionButtonsComponent.vue';
+import { BreadcrumbItem, Scheme } from '@/types';
+import { computed, ref } from 'vue';
+import DataTableComponent from '@/components/DataTableComponent.vue';
 
-const props = defineProps({
-  schemes: {
-    type: Array,
-    default: () => [],
-  },
-});
+const props = defineProps<{
+    schemes: Scheme[];
+}>();
+
+const breadcrumbs: BreadcrumbItem[] = [
+    {
+        title: 'Dashboard',
+        href: route('dashboard'),
+    },
+    {
+        title: 'Skema',
+        href: route('schemes.index'),
+    }
+]
 
 const searchQuery = ref('');
-const tableHeaders = ['Kode', 'Nama Skema', 'Tipe', 'Jumlah Unit'];
 
 const filteredSchemes = computed(() => {
-  if (!searchQuery.value) return props.schemes;
-  
-  const query = searchQuery.value.toLowerCase();
-  return props.schemes.filter(scheme => 
-    scheme.code.toLowerCase().includes(query) || 
-    scheme.name.toLowerCase().includes(query) ||
-    scheme.type.toLowerCase().includes(query)
-  );
+    if (!searchQuery.value) return props.schemes;
+    
+    const query = searchQuery.value.toLowerCase();
+    return props.schemes.filter(scheme => 
+        scheme.code.toLowerCase().includes(query) || 
+        scheme.name.toLowerCase().includes(query)
+    );
 });
+
+/**
+ * Determine if we should show the empty search message
+ */
+ const showEmptySearchMessage = computed(() => {
+    return searchQuery.value.length > 0 && filteredSchemes.value.length === 0;
+});
+
+/**
+ * Determine if we should show the empty data message
+ */
+const showEmptyDataMessage = computed(() => {
+    return props.schemes.length === 0;
+});
+
+const tableHeaders = ['Nama Skema', 'Kode', 'Tipe', 'Jumlah Unit', ''];
 </script>
 
 <template>
-  <AppLayout>
-    <Head title="Daftar Skema" />
+    <Head title="Daftar Unit" />
 
-    <div class="container py-6 space-y-6">
-      <div class="flex justify-between items-center">
-        <h1 class="text-2xl font-bold">Daftar Skema</h1>
-        <Link :href="route('schemes.create')">
-          <Button>
-            <PlusCircle class="h-4 w-4 mr-2" />
-            Tambah Skema
-          </Button>
-        </Link>
-      </div>
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <div class="py-6 md:py-12">
+            <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
+                <Card>
+                    <PageHeaderComponent title="Daftar Skema" description="Kelola skema sertifikasi">
+                        <Link :href="route('schemes.create')">
+                            <Button>Tambah Skema</Button>
+                        </Link>
+                    </PageHeaderComponent>
+                    <CardContent>
+                        <div class="mb-6 max-w-d">
+                            <SearchComponent 
+                                v-model="searchQuery"
+                                placeholder="Cari skema" />
+                        </div>
 
-      <div class="flex items-center border rounded-md px-3 max-w-sm">
-        <Search class="h-4 w-4 text-gray-500" />
-        <Input
-          v-model="searchQuery"
-          placeholder="Cari skema..."
-          class="border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-        />
-      </div>
+                        <!-- Tampilkan pesan pencarian kosong -->
+                        <div v-if="showEmptySearchMessage" class="text-center py-8 text-gray-500">
+                            Tidak ada skema yang cocok dengan pencarian Anda.
+                        </div>
 
-      <Table>
-        <TableCaption>Daftar skema yang tersedia</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead v-for="header in tableHeaders" :key="header">{{ header }}</TableHead>
-            <TableHead class="text-right">Aksi</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow v-for="scheme in filteredSchemes" :key="scheme.id">
-            <TableCell>{{ scheme.code }}</TableCell>
-            <TableCell>{{ scheme.name }}</TableCell>
-            <TableCell>{{ scheme.type }}</TableCell>
-            <TableCell>{{ scheme.units ? scheme.units.length : 0 }}</TableCell>
-            <TableCell class="text-right">
-              <ActionButtonsComponent
-                :show-route="route('schemes.show', scheme.id)"
-                :edit-route="route('schemes.edit', scheme.id)"
-                :delete-route="route('schemes.destroy', scheme.id)"
-                delete-message="Apakah Anda yakin ingin menghapus skema ini?"
-              />
-            </TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
-    </div>
-  </AppLayout>
+                        <!-- Tampilkan pesan data kosong -->
+                        <div v-else-if="showEmptyDataMessage" class="text-center py-8 text-gray-500">
+                            Belum ada skema yang terdaftar. Silakan tambahkan skema baru.
+                        </div>
+
+                        <DataTableComponent
+                            v-else
+                            :headers="tableHeaders"
+                            :items="filteredSchemes"
+                        >
+                            <TableRow v-for="scheme in filteredSchemes" :key="scheme.id">
+                                <TableCell>{{ scheme.code }}</TableCell>
+                                <TableCell>{{ scheme.name }}</TableCell>
+                                <TableCell>{{ scheme.type }}</TableCell>
+                                <TableCell>{{ (scheme as any).units .length }}</TableCell>
+                                <TableCell class="text-right">
+                                    <ActionButtonsComponent
+                                        :show-route="route('schemes.show', scheme.id)"
+                                        :edit-route="route('schemes.edit', scheme.id)"
+                                        :delete-route="route('schemes.destroy', scheme.id)"
+                                        delete-message="Apakah Anda yakin ingin menghapus unit ini?"
+                                    />
+                                </TableCell>
+                            </TableRow>
+                        </DataTableComponent>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    </AppLayout>
 </template>

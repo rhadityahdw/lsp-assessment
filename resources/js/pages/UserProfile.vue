@@ -8,12 +8,13 @@ import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader,
 import InputError from '@/components/InputError.vue';
 import { onMounted, ref } from 'vue';
 import Navbar from '@/components/Navbar.vue';
-import { Profile } from '@/types';
+import { Profile, User } from '@/types';
 import { useToast } from 'vue-toastification';
 import Footer from '@/components/Footer.vue';
 import { Textarea } from '@/components/ui/textarea';
 
 const props = defineProps<{
+    user: User;
     profile: Profile | null;
 }>();
 
@@ -22,6 +23,7 @@ const isSubmitting = ref(false);
 const toast = useToast();
 
 const form = useForm({
+    nama: props.user.name,
     nik: '',
     gender: '',
     date_of_birth: '',
@@ -40,6 +42,7 @@ onMounted(() => {
     if (props.profile) {
         form.clearErrors();
         form.reset();
+        form.name = props.user.name;
         form.nik = props.profile.nik;
         form.gender = props.profile.gender;
         form.date_of_birth = props.profile.date_of_birth;
@@ -118,6 +121,19 @@ const handleUpdate = (form: any) => {
                         <!-- Informasi Pribadi -->
                         <div class="space-y-6">
                             <h1 class="text-lg">Informasi Pribadi</h1>
+                            <!-- Nama -->
+                            <div class="space-y-2">
+                                <Label for="name">Nama Lengkap</Label>
+                                <Input
+                                    id="name"
+                                    v-model="form.name"
+                                    type="text"
+                                    placeholder="Nama lengkap"
+                                    required
+                                />
+                                <InputError :message="form.errors.name" />
+                            </div>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- NIK -->
                                 <div class="space-y-2">

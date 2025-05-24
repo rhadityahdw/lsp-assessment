@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 import InputError from '@/components/InputError.vue';
 import { CardAction, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Role, User } from '@/types';
+import { User } from '@/types';
 
 const props = defineProps<{
-    roles: Role[];
+    roles: string[];
     submitLabel?: string;
     cancelRoute?: string;
     initialData?: User;
@@ -27,7 +27,7 @@ const form = useForm({
     email: props.initialData?.email || '',
     password: '',
     password_confirmation: '',
-    role_id: props.initialData?.role_id || '',
+    role_name: props.initialData?.roles?.[0]?.name || '',
 });
 
 const capitalizeFirstLetter = (string: string) => {
@@ -84,17 +84,17 @@ const submit = () => {
             </div>
             <div class="grid gap-2">
                 <Label for="role">Role</Label>
-                <Select v-model="form.role_id" id="role">
+                <Select v-model="form.role_name" id="role">
                     <SelectTrigger class="w-full" tabindex="5">
                         <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem v-for="role in roles" :key="role.id" :value="role.id">
-                            {{ capitalizeFirstLetter(role.name) }}
+                        <SelectItem v-for="role in roles" :key="role" :value="role">
+                            {{ capitalizeFirstLetter(role) }}
                         </SelectItem>
                     </SelectContent>
                 </Select>
-                <InputError :message="form.errors.role_id"/>
+                <InputError :message="form.errors.role_name"/>
             </div>
         </CardContent>
         <CardFooter class="flex items-center justify-end">

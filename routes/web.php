@@ -21,11 +21,18 @@ Route::resource('units', UnitController::class);
 Route::resource('assessments', AssessmentController::class);
 
 Route::get('pendaftaran', function () {
-    return Inertia::render('Pendaftaran');
+    $schemes = app(App\Services\SchemeService::class)->getAllSchemes();
+
+    return Inertia::render('Pendaftaran', [
+        'schemes' => $schemes,
+    ]);
 })->name('pendaftaran');
 
 Route::get('skema', function () {
-    return Inertia::render('Scheme');
+    $schemes = app(App\Services\SchemeService::class)->getAllSchemes();
+    return Inertia::render('Scheme', [
+        'schemes' => $schemes,
+    ]);
 })->name('skema');
 
 require __DIR__.'/settings.php';

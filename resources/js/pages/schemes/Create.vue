@@ -9,7 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import InputError from '@/components/InputError.vue';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Card, CardContent, CardFooter, CardHeader, CardTitle
+  Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle
 } from '@/components/ui/card';
 import { ArrowLeft, Trash2 } from 'lucide-vue-next';
 import { BreadcrumbItem, Unit } from '@/types';
@@ -37,33 +37,22 @@ const form = useForm({
   code: '',
   name: '',
   type: '',
-  units: [],
+  unit_ids: [] as number[],
   document_path: '',
   summary: '',
 });
 
-const selectedUnits = ref<Unit[]>([]);
+form.transform((data) => ({
+  ...data,
+  unit_ids: data.unit_ids.map(id => Number(id))
+}));
+
 
 const handleUnitSelection = (unitId: number, checked: boolean): void => {
-  if (checked) {
-    if (!form.units.some(id => id === unitId)) {
-      form.units.push(unitId);
-      const foundUnit = props.units.find(unit => unit.id === unitId);
-      if (foundUnit) {
-        selectedUnits.value.push(foundUnit);
-      }
-    }
-  } else {
-    const index = form.units.indexOf(unitId);
-    if (index !== -1) {
-      form.units.splice(index, 1);
-      selectedUnits.value = selectedUnits.value.filter(unit => unit.id !== unitId);
-    }
-  }
-};
-
-const isUnitSelected = (unitId: number): boolean => {
-  return form.units.includes(unitId);
+  console.log(`Checkbox unit ${unitId} is now ${checked}`);
+  form.unit_ids = checked 
+    ? [...form.unit_ids, unitId]
+    : form.unit_ids.filter((id: number) => id !== unitId)
 };
 
 const submit = (): void => {
@@ -85,7 +74,7 @@ const submit = (): void => {
           <form @submit.prevent="submit">
             <CardContent>
               <!-- Informasi Skema -->
-              <div class="space-y-4">
+              <div class="space-y-6">
                 <h3 class="text-lg font-medium">Informasi Skema</h3>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -132,17 +121,16 @@ const submit = (): void => {
                     <div v-for="unit in props.units" :key="unit.id" class="p-3 flex items-center space-x-3">
                       <Checkbox 
                         :id="`unit-${unit.id}`" 
-                        :checked="isUnitSelected(unit.id)"
-                        @update:checked="(checked: boolean) => handleUnitSelection(unit.id, checked)"
+                        :modelValue="form.unit_ids.includes(unit.id)"
+                        @update:modelValue="(checked: boolean) => handleUnitSelection(unit.id, checked)"
                       />
                       <Label :for="`unit-${unit.id}`" class="flex-1 cursor-pointer">
                         <div class="font-medium">{{ unit.code }}</div>
                         <div class="text-sm text-gray-500">{{ unit.name }}</div>
-                        <div class="text-xs text-gray-400">{{ unit.type }}</div>
                       </Label>
                     </div>
                   </div>
-                  <InputError :message="form.errors.units" class="mt-2" />
+                  <InputError :message="form.errors.unit_ids" class="mt-2" />
                 </div>
                 <div v-else class="text-center py-4 text-gray-500">
                   Tidak ada unit kompetensi yang tersedia.
@@ -150,11 +138,13 @@ const submit = (): void => {
               </div>
             </CardContent>
             
-            <CardFooter class="flex justify-end gap-2">
-              <Button type="button" variant="outline" :href="route('schemes.index')" as-child>
-                <a>Batal</a>
-              </Button>
-              <Button type="submit" :disabled="form.processing">Simpan Skema</Button>
+            <CardFooter class="flex justify-end gap-2 mt-4">
+              <CardAction class="rounded-b-lg flex justify-end gap-2">
+                <Button type="button" variant="outline" :href="route('schemes.index')" as-child>
+                  <a>Batal</a>
+                </Button>
+                <Button type="submit" :disabled="form.processing">Simpan Skema</Button>
+              </CardAction>
             </CardFooter>
           </form>
         </Card>

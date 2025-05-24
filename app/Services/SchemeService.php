@@ -6,6 +6,7 @@ use App\Models\Scheme;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class SchemeService
 {
@@ -40,6 +41,8 @@ class SchemeService
     public function createScheme(array $schemeData, array $unitIds = []): Scheme
     {
         return DB::transaction(function () use ($schemeData, $unitIds) {
+            Log::debug('Creating scheme with units:', ['unit_ids' => $unitIds]);
+
             $scheme = Scheme::create($schemeData);
 
             if (!empty($unitIds)) {

@@ -9,4 +9,8 @@ use Illuminate\Support\Facades\DB;
 
 class ScheduleService
 {
+    public function getAllSchedules(): Collection
+    {
+        return Schedule::with(['schemes'])->get();
+    }
 }

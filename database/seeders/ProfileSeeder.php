@@ -10,11 +10,9 @@ class ProfileSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil semua user dengan role asesi (role_id = 2)
-        $asesiUsers = User::where('role_id', 2)->get();
+        $asesiUsers = User::role('asesi')->get();
         
         foreach ($asesiUsers as $index => $user) {
-            // Data profil yang berbeda untuk setiap user
             $profiles = [
                 [
                     'user_id' => $user->id,

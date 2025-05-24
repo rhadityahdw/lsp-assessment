@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -6,158 +6,151 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import InputError from '@/components/InputError.vue';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-vue-next';
+import { ArrowLeft, Trash2 } from 'lucide-vue-next';
+import { BreadcrumbItem, Unit } from '@/types';
 
-const props = defineProps({
+const props = defineProps<{
   scheme: {
-    type: Object,
-    required: true,
+    id: number;
+    code: string;
+    name: string;
+    type: string;
+    document_path?: string;
+    summary?: string;
+    units: Unit[];
+  };
+  units: Unit[];
+}>();
+
+const breadcrumbs: BreadcrumbItem[] = [
+  {
+    title: 'Dashboard',
+    href: route('dashboard'),
   },
-  units: {
-    type: Array,
-    default: () => [],
+  {
+    title: 'Skema',
+    href: route('schemes.index'),
   },
-});
+  {
+    title: 'Edit Skema',
+    href: route('schemes.edit', props.scheme.id),
+  },
+];
 
 const form = useForm({
   code: props.scheme.code,
   name: props.scheme.name,
   type: props.scheme.type,
-  units: props.scheme.units.map(unit => unit.id),
+  unit_ids: props.scheme.units.map(unit => unit.id),
   document_path: props.scheme.document_path || '',
   summary: props.scheme.summary || '',
 });
 
-const selectedUnits = ref([]);
+form.transform((data) => ({
+  ...data,
+  unit_ids: data.unit_ids.map(id => Number(id))
+}));
 
-onMounted(() => {
-  // Inisialisasi unit yang sudah dipilih
-  selectedUnits.value = props.scheme.units;
-});
-
-const handleUnitSelection = (unitId) => {
-  const id = parseInt(unitId);
-  if (!form.units.includes(id)) {
-    form.units.push(id);
-    selectedUnits.value.push(props.units.find(unit => unit.id === id));
-  }
+const handleUnitSelection = (unitId: number, checked: boolean): void => {
+  form.unit_ids = checked 
+    ? [...form.unit_ids, unitId]
+    : form.unit_ids.filter((id: number) => id !== unitId);
 };
 
-const removeUnit = (index) => {
-  const unitId = form.units[index];
-  form.units.splice(index, 1);
-  selectedUnits.value = selectedUnits.value.filter(unit => unit.id !== unitId);
-};
-
-const submit = () => {
+const submit = (): void => {
   form.put(route('schemes.update', props.scheme.id));
 };
 </script>
 
 <template>
-  <AppLayout>
-    <Head title="Edit Skema" />
+  <Head title="Edit Skema" />
 
-    <div class="container py-6 space-y-6">
-      <div class="flex items-center gap-4">
-        <Button variant="outline" :href="route('schemes.index')" as-child>
-          <a>
-            <ArrowLeft class="h-4 w-4 mr-2" />
-            Kembali
-          </a>
-        </Button>
-        <h1 class="text-2xl font-bold">Edit Skema</h1>
-      </div>
-
-      <form @submit.prevent="submit">
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="py-6 md:py-12">
+      <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
         <Card>
           <CardHeader>
-            <CardTitle>Informasi Skema</CardTitle>
+            <CardTitle class="text-xl md:text-2xl">Edit Skema</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-2">
-                <Label for="code">Kode Skema</Label>
-                <Input id="code" v-model="form.code" placeholder="Masukkan kode skema" required />
-                <p v-if="form.errors.code" class="text-sm text-red-500">{{ form.errors.code }}</p>
-              </div>
-              
-              <div class="space-y-2">
-                <Label for="name">Nama Skema</Label>
-                <Input id="name" v-model="form.name" placeholder="Masukkan nama skema" required />
-                <p v-if="form.errors.name" class="text-sm text-red-500">{{ form.errors.name }}</p>
-              </div>
-              
-              <div class="space-y-2">
-                <Label for="type">Tipe Skema</Label>
-                <Input id="type" v-model="form.type" placeholder="Masukkan tipe skema" required />
-                <p v-if="form.errors.type" class="text-sm text-red-500">{{ form.errors.type }}</p>
-              </div>
-              
-              <div class="space-y-2">
-                <Label for="document_path">Dokumen Path</Label>
-                <Input id="document_path" v-model="form.document_path" placeholder="Masukkan path dokumen" />
-                <p v-if="form.errors.document_path" class="text-sm text-red-500">{{ form.errors.document_path }}</p>
-              </div>
-              
-              <div class="space-y-2 md:col-span-2">
-                <Label for="summary">Ringkasan</Label>
-                <Textarea id="summary" v-model="form.summary" placeholder="Masukkan ringkasan skema" />
-                <p v-if="form.errors.summary" class="text-sm text-red-500">{{ form.errors.summary }}</p>
-              </div>
-            </div>
-          </CardContent>
-          
-          <CardHeader>
-            <CardTitle>Unit Kompetensi</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div class="space-y-4">
-              <div class="space-y-2">
-                <Label for="unit-select">Pilih Unit</Label>
-                <Select @update:modelValue="handleUnitSelection">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih unit kompetensi" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem v-for="unit in props.units" :key="unit.id" :value="unit.id">
-                      {{ unit.code }} - {{ unit.name }}
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <p v-if="form.errors.units" class="text-sm text-red-500">{{ form.errors.units }}</p>
-              </div>
-              
-              <div v-if="selectedUnits.length > 0" class="space-y-2">
-                <h3 class="text-sm font-medium">Unit yang dipilih:</h3>
-                <div class="border rounded-md divide-y">
-                  <div v-for="(unit, index) in selectedUnits" :key="unit.id" class="p-3 flex justify-between items-center">
-                    <div>
-                      <p class="font-medium">{{ unit.code }}</p>
-                      <p class="text-sm text-gray-500">{{ unit.name }}</p>
-                    </div>
-                    <Button variant="ghost" size="icon" @click="removeUnit(index)" type="button">
-                      <Trash2 class="h-4 w-4 text-red-500" />
-                    </Button>
+          <form @submit.prevent="submit">
+            <CardContent>
+              <!-- Informasi Skema -->
+              <div class="space-y-6">
+                <h3 class="text-lg font-medium">Informasi Skema</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <Label for="code">Kode Skema</Label>
+                    <Input id="code" v-model="form.code" placeholder="Masukkan kode skema" />
+                    <InputError :message="form.errors.code" />
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="name">Nama Skema</Label>
+                    <Input id="name" v-model="form.name" placeholder="Masukkan nama skema" />
+                    <InputError :message="form.errors.name" />
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="type">Tipe Skema</Label>
+                    <Input id="type" v-model="form.type" placeholder="Masukkan tipe skema" />
+                    <InputError :message="form.errors.type" />
+                  </div>
+
+                  <div class="space-y-2">
+                    <Label for="document_path">Dokumen Path</Label>
+                    <Input id="document_path" v-model="form.document_path" placeholder="Masukkan path dokumen" />
+                    <InputError :message="form.errors.document_path" />
+                  </div>
+
+                  <div class="space-y-2 md:col-span-2">
+                    <Label for="summary">Ringkasan</Label>
+                    <Textarea id="summary" v-model="form.summary" placeholder="Masukkan ringkasan skema" />
+                    <InputError :message="form.errors.summary" />
                   </div>
                 </div>
               </div>
-            </div>
-          </CardContent>
-          
-          <CardFooter class="flex justify-end gap-2">
-            <Button type="submit" :disabled="form.processing">Simpan Perubahan</Button>
-          </CardFooter>
+            </CardContent>
+
+            <CardHeader>
+              <CardTitle class="text-md font-medium">Pilih Unit Kompetensi</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div class="space-y-4">
+                <div v-if="props.units.length > 0">
+                  <div class="border rounded-md divide-y">
+                    <div v-for="unit in props.units" :key="unit.id" class="p-3 flex items-center space-x-3">
+                      <Checkbox 
+                        :id="`unit-${unit.id}`" 
+                        :modelValue="form.unit_ids.includes(unit.id)"
+                        @update:modelValue="(checked: boolean) => handleUnitSelection(unit.id, checked)"
+                      />
+                      <Label :for="`unit-${unit.id}`" class="flex-1 cursor-pointer">
+                        <div class="font-medium">{{ unit.code }}</div>
+                        <div class="text-sm text-gray-500">{{ unit.name }}</div>
+                      </Label>
+                    </div>
+                  </div>
+                  <InputError :message="form.errors.unit_ids" class="mt-2" />
+                </div>
+                <div v-else class="text-center py-4 text-gray-500">
+                  Tidak ada unit kompetensi yang tersedia.
+                </div>
+              </div>
+            </CardContent>
+            
+            <CardFooter class="flex justify-end gap-2 mt-4">
+              <Button type="button" variant="outline" :href="route('schemes.index')" as-child>
+                <a>Batal</a>
+              </Button>
+              <Button type="submit" :disabled="form.processing">Simpan Perubahan</Button>
+            </CardFooter>
+          </form>
         </Card>
-      </form>
+      </div>
     </div>
   </AppLayout>
 </template>

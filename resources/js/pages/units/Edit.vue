@@ -2,7 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter, CardAction } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import InputError from '@/components/InputError.vue';
@@ -70,7 +70,7 @@ const submit = () => {
                     <CardHeader>
                         <CardTitle class="text-xl md:text-2xl font-bold">Edit Unit</CardTitle>
                     </CardHeader>
-                    <form @submit.prevent="submit">
+                    <form @submit.prevent="submit" class="space-y-6">
                         <CardContent class="space-y-6">
                             <!-- Informasi Unit -->
                             <div class="space-y-4">
@@ -143,13 +143,13 @@ const submit = () => {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter>
-                            <div class="flex justify-end gap-2">
-                                <Link :href="route('units.show', props.unit.id)">
+                        <CardFooter class="flex items-center justify-end">
+                            <CardAction class="rounded-b-lg flex justify-end gap-2">
+                                <Link :href="route('units.index')">
                                     <Button type="button" variant="outline">Kembali</Button>
                                 </Link>
                                 <Button type="submit" variant="default" :disabled="form.processing">Simpan</Button>
-                            </div>
+                            </CardAction>
                         </CardFooter>
                     </form>
                 </Card>

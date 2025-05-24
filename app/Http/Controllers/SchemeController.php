@@ -58,7 +58,8 @@ class SchemeController extends Controller
             'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
-            'units' => 'required|array',
+            'unit_ids' => 'required|array',
+            'unit_ids.*' => 'exists:units,id',
             'document_path' => 'nullable|string|max:255',
             'summary' => 'string|max:255',
         ]);
@@ -71,7 +72,7 @@ class SchemeController extends Controller
             'summary' => $validated['summary'],
         ];
 
-        $unitIds = $validated['units'];
+        $unitIds = $validated['unit_ids'];
 
         $this->schemeService->createScheme($schemeData, $unitIds);
 
@@ -124,20 +125,21 @@ class SchemeController extends Controller
             'code' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'type' => 'required|string|max:255',
-            'units' => 'required|array',
-            'document_path' => 'nullable|string|max:255',
-            'summary' => 'string|max:255',
+            'unit_ids' => 'required|array',
+            'unit_ids.*' => 'exists:units,id',
+            'document_path' => 'required|string|max:255',
+            'summary' => 'required|string|max:255',
         ]);
 
         $schemeData = [
             'code' => $validated['code'],
             'name' => $validated['name'],
             'type' => $validated['type'],
-            'document_path' => $validated['document_path'] ?? null,
+            'document_path' => $validated['document_path'],
             'summary' => $validated['summary'],
         ];
 
-        $unitIds = $validated['units'];
+        $unitIds = $validated['unit_ids'];
 
         $this->schemeService->updateScheme($id, $schemeData, $unitIds);
 

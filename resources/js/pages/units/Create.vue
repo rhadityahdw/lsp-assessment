@@ -70,7 +70,7 @@ const submit = () => {
                     <CardHeader>
                         <CardTitle class="text-xl md:text-2xl font-bold">Tambah Unit</CardTitle>
                     </CardHeader>
-                    <form @submit.prevent="submit">
+                    <form @submit.prevent="submit" class="space-y-6">
                         <CardContent class="space-y-6">
                             <!-- Informasi Unit -->
                             <div class="space-y-4">
@@ -143,13 +143,13 @@ const submit = () => {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter>
-                            <div class="flex justify-end gap-2">
+                        <CardFooter class="flex items-center justify-end">
+                            <CardAction class="rounded-b-lg flex justify-end gap-2">
                                 <Link :href="route('units.index')">
                                     <Button type="button" variant="outline">Kembali</Button>
                                 </Link>
                                 <Button type="submit" variant="default" :disabled="form.processing">Simpan</Button>
-                            </div>
+                            </CardAction>
                         </CardFooter>
                     </form>
                 </Card>

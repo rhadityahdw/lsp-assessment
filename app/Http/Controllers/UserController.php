@@ -2,105 +2,105 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Role;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
-use Inertia\Response;
 
 class UserController extends Controller
 {
-    /**
-     * CRUD User
-     */
+    protected UserService $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     public function index()
     {
-        $users = User::with('role')->get();
+        $users = User::with('roles')->get();
 
         return Inertia::render('users/Index', [
-            'users' => $users
+            'users' => $users,
         ]);
     }
 
-    public function create(): Response
+    public function create()
     {
-        $roles = Role::all();
+        $roles = Role::pluck('name');
 
         return Inertia::render('users/Create', [
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|email|unique:users,email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role_id' => 'required|exists:roles,id',
+            'role_name' => 'required|string|exists:roles,name',
         ]);
 
-        
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => $validated['password'],
+            'role_name' => $validated['role_name'],
+        ];
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => $request->role_id,
-        ]);
-
-        Inertia::render('users/Show', [
-            'permissions' => $user->getAllPermissions(),
-        ]);
+        $this->userService->createUser($data);
 
         return redirect()->route('users.index')->with('success', 'User created successfully');
     }
 
-    public function show(User $user)
-    {
-        return Inertia::render('users/Show', [
-            'user' => $user->load('role')
-        ]);
-    }
-
     public function edit(User $user)
     {
-        $roles = Role::all();
+        $roles = Role::pluck('name');
 
         return Inertia::render('users/Edit', [
-            'user' => $user,
-            'roles' => $roles
+            'user' => $user->load('roles'),
+            'roles' => $roles,
         ]);
     }
 
     public function update(Request $request, User $user)
     {
-        $request->validate([
+        $rules = [
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
-            'role_id' => 'required|exists:roles,id',
-        ]);
-
-        $user->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role_id' => $request->role_id,
-        ]);
+            'email' => 'required|email|unique:users,email,' . $user->id,
+            'role_name' => 'required|string|exists:roles,name',
+        ];
 
         if ($request->filled('password')) {
-            $request->validate([
-                'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            ]);
-            
-            $user->update([
-                'password' => Hash::make($request->password),
-            ]);
+            $rules['password'] = ['confirmed', Rules\Password::defaults()];
         }
 
+        $validated = $request->validate($rules);
+
+        $data = [
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role_name' => $validated['role_name'],
+        ];
+
+        if (isset($validated['password'])) {
+            $data['password'] = $validated['password'];
+        }
+
+        $this->userService->updateUser($user, $data);
+
         return redirect()->route('users.index')->with('success', 'User updated successfully');
+    }
+
+    public function show(User $user)
+    {
+        return Inertia::render('users/Show', [
+            'user' => $user->load('roles'),
+        ]);
     }
 
     public function destroy(User $user)

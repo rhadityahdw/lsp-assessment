@@ -26,9 +26,4 @@ class Assessment extends Model
     {
         return $this->belongsTo(Scheme::class);
     }
-
-    /**
-     * Get the schedule for the assessment.
-     */
-    // public function schedule()
 }

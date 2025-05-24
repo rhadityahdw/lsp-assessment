@@ -5,118 +5,25 @@ import Navbar from '@/components/Navbar.vue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Filter, BookOpen, Award, Calendar, ChevronUp } from 'lucide-vue-next';
+import { Link } from '@inertiajs/vue3';
+import { Scheme } from '@/types';
+
+// Define props to receive data from controller
+const props = defineProps<{
+    schemes: Scheme[];
+}>();
 
 // Add missing variables
 const mobileFilterOpen = ref(false);
 const sortOrder = ref('newest');
 const windowWidth = ref(window.innerWidth);
 
-// Dummy data for certification schemes based on database schema
-// Remove isNew and isPopular properties from all scheme objects
-const schemes = [
-    {
-        id: 1,
-        scheme_code: 'KKNI-NA-001',
-        scheme_name: 'Network Administrator Muda',
-        scheme_type: 'KKNI',
-        competency_units: 5,
-        scheme_document_path: '/documents/schemes/network-admin.pdf',
-        scheme_summary: 'Skema sertifikasi untuk profesional jaringan tingkat pemula yang mencakup konfigurasi, pemeliharaan, dan troubleshooting jaringan komputer.',
-        image: '/images/schemes/network-admin.png',
-        created_at: '2023-10-15T08:30:00Z'
-    },
-    {
-        id: 2,
-        scheme_code: 'KKNI-BD-002',
-        scheme_name: 'Ilmuwan Big Data',
-        scheme_type: 'KKNI',
-        competency_units: 6,
-        scheme_document_path: '/documents/schemes/big-data.pdf',
-        scheme_summary: 'Skema sertifikasi untuk profesional data science yang fokus pada pengolahan dan analisis big data menggunakan berbagai tools dan metodologi.',
-        image: '/images/schemes/big-data.png',
-        created_at: '2023-09-20T10:15:00Z'
-    },
-    {
-        id: 3,
-        scheme_code: 'KKNI-DB-003',
-        scheme_name: 'Pemrogram Basisdata',
-        scheme_type: 'KKNI',
-        competency_units: 4,
-        scheme_document_path: '/documents/schemes/database.pdf',
-        scheme_summary: 'Skema sertifikasi untuk pengembang database yang mencakup desain, implementasi, dan optimasi database relasional dan non-relasional.',
-        image: '/images/schemes/database.png',
-        created_at: '2023-08-05T14:45:00Z'
-    },
-    {
-        id: 4,
-        scheme_code: 'KKNI-MM-004',
-        scheme_name: 'Desainer Multimedia Muda',
-        scheme_type: 'KKNI',
-        competency_units: 5,
-        scheme_document_path: '/documents/schemes/multimedia.pdf',
-        scheme_summary: 'Skema sertifikasi untuk desainer multimedia yang mencakup desain grafis, animasi, dan pengembangan konten interaktif.',
-        image: '/images/schemes/multimedia.png',
-        created_at: '2023-07-12T09:30:00Z'
-    },
-    {
-        id: 5,
-        scheme_code: 'OKP-DM-005',
-        scheme_name: 'Pemasaran Digital',
-        scheme_type: 'Okupasi',
-        competency_units: 4,
-        scheme_document_path: '/documents/schemes/digital-marketing.pdf',
-        scheme_summary: 'Skema sertifikasi untuk spesialis pemasaran digital yang mencakup SEO, SEM, media sosial, dan analitik digital.',
-        image: '/images/schemes/digital-marketing.png',
-        created_at: '2023-06-18T11:20:00Z'
-    },
-    {
-        id: 6,
-        scheme_code: 'OKP-PM-006',
-        scheme_name: 'Manajer Proyek',
-        scheme_type: 'Okupasi',
-        competency_units: 7,
-        scheme_document_path: '/documents/schemes/project-manager.pdf',
-        scheme_summary: 'Skema sertifikasi untuk manajer proyek yang mencakup perencanaan, eksekusi, monitoring, dan penutupan proyek teknologi informasi.',
-        image: '/images/schemes/project-manager.png',
-        created_at: '2023-05-25T13:40:00Z'
-    },
-    {
-        id: 7,
-        scheme_code: 'KLS-IT-007',
-        scheme_name: 'Auditor IT',
-        scheme_type: 'Klaster',
-        competency_units: 5,
-        scheme_document_path: '/documents/schemes/it-audit.pdf',
-        scheme_summary: 'Skema sertifikasi untuk auditor IT yang mencakup evaluasi keamanan, kepatuhan, dan efektivitas sistem informasi.',
-        image: '/images/schemes/it-audit.png',
-        created_at: '2023-04-10T15:50:00Z'
-    },
-    {
-        id: 8,
-        scheme_code: 'KLS-NT-008',
-        scheme_name: 'Teknisi Jaringan',
-        scheme_type: 'Klaster',
-        competency_units: 3,
-        scheme_document_path: '/documents/schemes/network-tech.pdf',
-        scheme_summary: 'Skema sertifikasi untuk teknisi jaringan yang mencakup instalasi, konfigurasi, dan pemeliharaan infrastruktur jaringan.',
-        image: '/images/schemes/network-tech.png',
-        created_at: '2023-03-15T10:30:00Z'
-    }
-];
-
-// Update categories to remove any references to 'popular' and 'new'
+// Define categories for filtering
 const categories = [
     { id: 'all', name: 'Semua Skema' },
     { id: 'okupasi', name: 'Okupasi', dbValue: 'Okupasi' },
     { id: 'kkni', name: 'KKNI', dbValue: 'KKNI' },
     { id: 'klaster', name: 'Klaster', dbValue: 'Klaster' },
-    { id: 'digital-marketing', name: 'Digital Marketing & Office' },
-    { id: 'data-science', name: 'Data Science' },
-    { id: 'software-dev', name: 'Software Development' },
-    { id: 'multimedia', name: 'Multimedia' },
-    { id: 'project-quality', name: 'Project Quality & Management' },
-    { id: 'network-admin', name: 'Network Administrator' },
-    { id: 'graphic-design', name: 'Graphic Design' }
 ];
 
 const selectedCategory = ref('all');
@@ -124,21 +31,14 @@ const searchQuery = ref('');
 
 // Filter schemes based on selected category and search query
 const filteredSchemes = computed(() => {
-    let filtered = schemes;
+    let filtered = props.schemes;
     
-    // Filter by category - only keep the valid filters
+    // Filter by category
     if (['okupasi', 'kkni', 'klaster'].includes(selectedCategory.value)) {
         // Filter by scheme_type
         const categoryObj = categories.find(cat => cat.id === selectedCategory.value);
         filtered = filtered.filter(scheme => 
-            scheme.scheme_type === categoryObj?.dbValue
-        );
-    } else if (selectedCategory.value !== 'all') {
-        // Filter by other categories (more generic)
-        const categoryName = categories.find(cat => cat.id === selectedCategory.value)?.name;
-        filtered = filtered.filter(scheme => 
-            scheme.scheme_name.includes(categoryName || '') || 
-            scheme.scheme_summary.includes(categoryName || '')
+            scheme.type === categoryObj?.dbValue
         );
     }
     
@@ -146,9 +46,9 @@ const filteredSchemes = computed(() => {
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
         filtered = filtered.filter(scheme => 
-            scheme.scheme_name.toLowerCase().includes(query) || 
-            scheme.scheme_code.toLowerCase().includes(query) ||
-            scheme.scheme_summary.toLowerCase().includes(query)
+            scheme.name.toLowerCase().includes(query) || 
+            scheme.code.toLowerCase().includes(query) ||
+            (scheme.summary && scheme.summary.toLowerCase().includes(query))
         );
     }
     
@@ -187,6 +87,11 @@ const sortedSchemes = computed(() => {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
     );
 });
+
+// Count units for each scheme
+const getUnitCount = (scheme: any) => {
+    return scheme.units ? scheme.units.length : 0;
+};
 
 // Update the onMounted and onUnmounted hooks
 onMounted(() => {
@@ -259,23 +164,7 @@ onUnmounted(() => {
                     <div class="border-t pt-4">
                         <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Kategori</h3>
                         <ul class="space-y-1">
-                            <li v-for="cat in categories.slice(3, 6)" :key="cat.id" 
-                                :class="[
-                                    'cursor-pointer px-3 py-2 rounded-md transition-colors',
-                                    selectedCategory === cat.id 
-                                        ? 'bg-cyan-50 text-cyan-700 font-medium' 
-                                        : 'hover:bg-gray-50 hover:text-cyan-600'
-                                ]"
-                                @click="selectCategory(cat.id)">
-                                {{ cat.name }}
-                            </li>
-                        </ul>
-                    </div>
-                    
-                    <div class="border-t pt-4 mt-4">
-                        <h3 class="text-sm font-medium text-gray-500 mb-3 uppercase tracking-wider">Bidang Keahlian</h3>
-                        <ul class="space-y-1">
-                            <li v-for="cat in categories.slice(6)" :key="cat.id" 
+                            <li v-for="cat in categories.slice(1)" :key="cat.id" 
                                 :class="[
                                     'cursor-pointer px-3 py-2 rounded-md transition-colors',
                                     selectedCategory === cat.id 
@@ -329,35 +218,37 @@ onUnmounted(() => {
                     <div v-for="scheme in sortedSchemes" :key="scheme.id" 
                         class="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 flex flex-col">
                         <div class="relative">
-                            <img :src="scheme.image" :alt="scheme.scheme_name" class="w-full h-40 sm:h-52 object-contain bg-gray-50 p-4" />
-                            <!-- Removed the "Terbaru" and "Populer" badges -->
+                            <!-- Placeholder image if no specific image is available -->
+                            <img :src="'/images/schemes/default.png'" :alt="scheme.name" class="w-full h-40 sm:h-52 object-contain bg-gray-50 p-4" />
                             <div class="absolute top-3 right-3 bg-gray-800 bg-opacity-80 text-white text-xs font-medium px-3 py-1 rounded-full shadow-sm">
-                                {{ scheme.scheme_type }}
+                                {{ scheme.type }}
                             </div>
                         </div>
                         <div class="p-5 flex-grow flex flex-col">
                             <div class="flex items-center text-xs text-gray-500 mb-2">
-                                <span class="bg-cyan-50 text-cyan-700 px-2 py-1 rounded font-medium">{{ scheme.scheme_code }}</span>
+                                <span class="bg-cyan-50 text-cyan-700 px-2 py-1 rounded font-medium">{{ scheme.code }}</span>
                                 <span class="ml-auto flex items-center">
                                     <Calendar class="h-3.5 w-3.5 mr-1" />
                                     {{ new Date(scheme.created_at).toLocaleDateString('id-ID') }}
                                 </span>
                             </div>
-                            <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ scheme.scheme_name }}</h3>
-                            <p class="text-gray-600 text-sm mb-4 flex-grow">{{ scheme.scheme_summary.substring(0, 120) }}...</p>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">{{ scheme.name }}</h3>
+                            <p class="text-gray-600 text-sm mb-4 flex-grow">{{ scheme.summary ? String(scheme.summary).slice(0, 120) + '...' : 'Tidak ada deskripsi' }}</p>
                             <div class="flex items-center justify-between mb-4 text-sm">
                                 <span class="flex items-center text-cyan-700 font-medium">
                                     <BookOpen class="h-4 w-4 mr-1" />
-                                    {{ scheme.competency_units }} Unit Kompetensi
+                                    {{ getUnitCount(scheme) }} Unit Kompetensi
                                 </span>
                                 <span class="flex items-center text-amber-700">
                                     <Award class="h-4 w-4 mr-1" />
                                     Sertifikasi BNSP
                                 </span>
                             </div>
-                            <Button class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm">
-                                Lihat Detail Skema
-                            </Button>
+                            <Link :href="route('schemes.show', scheme.id)" class="w-full">
+                                <Button class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm">
+                                    Lihat Detail Skema
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

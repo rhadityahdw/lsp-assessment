@@ -31,7 +31,7 @@ const navItems = [
   { id: 'skema', label: 'Skema Sertifikasi', icon: Award, href: route('skema')  },
 ];
 
-const authUser = computed(() => page.props.auth.user as User);
+const authUser = computed(() => page.props.auth.user);
 
 // Determine active item based on current route
 const activeItem = computed(() => {
@@ -105,7 +105,7 @@ const setActive = (): void => {
                             <div class="p-2 mb-1 bg-gray-50 rounded-md">
                                 <p class="font-medium text-gray-800">{{ authUser.name }}</p>
                                 <p class="text-sm text-gray-500">{{ authUser.email }}</p>
-                                <p class="text-xs text-cyan-600 mt-1 font-medium">{{ authUser.role.name }}</p>
+                                <p class="text-xs text-cyan-600 mt-1 font-medium">{{ authUser.roles }}</p>
                             </div>
                             <Link :href="route('profile.index')">
                                 <DropdownMenuItem class="cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50 rounded-md mt-1">
@@ -159,7 +159,7 @@ const setActive = (): void => {
                         </Avatar>
                         <div>
                             <p class="font-medium text-gray-800">{{ authUser.name }}</p>
-                            <p class="text-xs text-cyan-600">{{ authUser.role_id }}</p>
+                            <p class="text-xs text-cyan-600">{{ authUser.roles }}</p>
                             <p class="text-xs text-gray-500">{{ authUser.email }}</p>
                         </div>
                     </div>

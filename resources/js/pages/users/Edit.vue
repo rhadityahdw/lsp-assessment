@@ -2,12 +2,12 @@
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { BreadcrumbItem, User, Role } from '@/types';
+import { BreadcrumbItem, User } from '@/types';
 import UserForm from '@/components/UserForm.vue';
 
 const props = defineProps<{
     user: User;
-    roles: Role[];
+    roles: string[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -26,7 +26,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const handleUpdateSubmit = (form: any) => {
-    form.post(route('users.update', props.user.id), {
+    form.put(route('users.update', props.user.id), {
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {

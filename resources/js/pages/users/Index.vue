@@ -15,6 +15,8 @@ const props = defineProps<{
     users: User[];
 }>();
 
+console.log(props.users)
+
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('dashboard') },
     { title: 'Users', href: route('users.index') },
@@ -32,7 +34,7 @@ const filteredUsers = computed(() => {
     return props.users.filter(user => 
         user.name.toLowerCase().includes(query) || 
         user.email.toLowerCase().includes(query) ||
-        user.role.name.toLowerCase().includes(query)
+        user.roles[0].name.toLowerCase().includes(query)
     );
 });
 
@@ -84,7 +86,7 @@ const tableHeaders = ['Name', 'Email', 'Role', ''];
                 <Card>
                     <PageHeaderComponent title="Daftar Pengguna">
                         <Link :href="route('users.create')">
-                            <Button>Create</Button>
+                            <Button>Tambah User</Button>
                         </Link>
                     </PageHeaderComponent>
                     <CardContent>
@@ -115,8 +117,8 @@ const tableHeaders = ['Name', 'Email', 'Role', ''];
                                 <TableCell>{{ user.name }}</TableCell>
                                 <TableCell>{{ user.email }}</TableCell>
                                 <TableCell>
-                                    <span :class="['px-2 py-1 text-xs font-medium rounded-full', getBadgeRole(user.role.name)]">
-                                        {{ capitalizeFirstLetter(user.role.name) }}
+                                    <span :class="['px-2 py-1 text-xs font-medium rounded-full', getBadgeRole(user.roles[0].name)]">
+                                        {{ capitalizeFirstLetter(user.roles[0].name) }}
                                     </span>
                                 </TableCell>
                                 <TableCell class="text-right">

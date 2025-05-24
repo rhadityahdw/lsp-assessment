@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { BreadcrumbItem, User, Role } from '@/types';
+import { BreadcrumbItem, User } from '@/types';
 import { UserCircle, Mail, Shield } from 'lucide-vue-next';
 import ProfileCard from '@/components/ProfileCard.vue';
 
 const props = defineProps<{
     user: User;
-    roles: Role[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -48,7 +47,7 @@ const infoSections = [
     {
         icon: Shield,
         label: 'User Role',
-        value: capitalizeFirstLetter(props.user.role?.name)
+        value: capitalizeFirstLetter(props.user.roles[0].name)
     }
 ];
 
@@ -98,8 +97,8 @@ const actions = [
                     title="User Details"
                     :entity="props.user"
                     :avatar-icon="UserCircle"
-                    :badge-text="capitalizeFirstLetter(props.user.role?.name)"
-                    :badge-class="getRoleBadgeClass(props.user.role?.name)"
+                    :badge-text="capitalizeFirstLetter(props.user.roles[0].name)"
+                    :badge-class="getRoleBadgeClass(props.user.roles[0].name)"
                     :info-sections="infoSections"
                     :detail-sections="detailSections"
                     :actions="actions"

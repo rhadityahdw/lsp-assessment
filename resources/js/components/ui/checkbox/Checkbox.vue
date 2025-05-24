@@ -3,19 +3,29 @@ import type { CheckboxRootEmits, CheckboxRootProps } from 'reka-ui'
 import { cn } from '@/lib/utils'
 import { Check } from 'lucide-vue-next'
 import { CheckboxIndicator, CheckboxRoot, useForwardPropsEmits } from 'reka-ui'
-import { computed, type HTMLAttributes } from 'vue'
+import { ref, computed, type HTMLAttributes } from 'vue'
 
 const props = withDefaults(
   defineProps<CheckboxRootProps & { 
     class?: HTMLAttributes['class']
     indeterminate?: boolean
+    modelValue: boolean
   }>(),
   {
-    indeterminate: false
+    indeterminate: false,
+    modelValue: false
   }
 )
 
-const emits = defineEmits<CheckboxRootEmits>()
+const modelChecked = ref(false)
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: boolean): void
+}>()
+
+const handleCheckedChange = (checked: boolean) => {
+  emit('update:modelValue', checked)
+}
 
 const delegatedProps = computed(() => {
   const { class: _, ...delegated } = props
@@ -23,11 +33,13 @@ const delegatedProps = computed(() => {
   return delegated
 })
 
-const forwarded = useForwardPropsEmits(delegatedProps, emits)
+const forwarded = useForwardPropsEmits(delegatedProps, emit)
 </script>
 
 <template>
   <CheckboxRoot
+    :checked="props.checked"
+    @checked-change="handleCheckedChange"
     data-slot="checkbox"
     :data-state="indeterminate ? 'indeterminate' : undefined"
     v-bind="forwarded"

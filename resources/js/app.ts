@@ -8,6 +8,7 @@ import { ZiggyVue } from 'ziggy-js';
 import { initializeTheme } from './composables/useAppearance';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
+import { createPinia } from 'pinia';
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -37,6 +38,7 @@ const toastOptions = {
 };
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const pinia = createPinia();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -45,6 +47,7 @@ createInertiaApp({
         createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(pinia)
             .use(Toast, toastOptions)
             .mount(el);
     },

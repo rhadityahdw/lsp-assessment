@@ -14,12 +14,12 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(SchemeService::class,
-        function ($app) {
+        function () {
             return new SchemeService();
         });
 
         $this->app->singleton(UnitService::class,
-        function ($app) {
+        function () {
             return new UnitService();
         });
     }
