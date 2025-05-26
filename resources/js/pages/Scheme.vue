@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import Navbar from '@/components/Navbar.vue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Filter, BookOpen, Award, Calendar, ChevronUp } from 'lucide-vue-next';
+import { Search, Filter, BookOpen, Award, Calendar, ChevronUp, AlertCircle } from 'lucide-vue-next';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Link } from '@inertiajs/vue3';
 import { Scheme } from '@/types';
 
@@ -12,6 +13,13 @@ import { Scheme } from '@/types';
 const props = defineProps<{
     schemes: Scheme[];
 }>();
+
+const { auth }: any = usePage().props;
+const hasProfile = computed(() => auth.user?.profile);
+
+// Modal state
+const showRegistrationModal = ref(false);
+const selectedScheme = ref<Scheme | null>(null);
 
 // Add missing variables
 const mobileFilterOpen = ref(false);
@@ -91,6 +99,17 @@ const sortedSchemes = computed(() => {
 // Count units for each scheme
 const getUnitCount = (scheme: any) => {
     return scheme.units ? scheme.units.length : 0;
+};
+
+// Registration modal functions
+const openRegistrationModal = (scheme: Scheme) => {
+    selectedScheme.value = scheme;
+    showRegistrationModal.value = true;
+};
+
+const closeRegistrationModal = () => {
+    showRegistrationModal.value = false;
+    selectedScheme.value = null;
 };
 
 // Update the onMounted and onUnmounted hooks
@@ -244,11 +263,17 @@ onUnmounted(() => {
                                     Sertifikasi BNSP
                                 </span>
                             </div>
-                            <Link :href="route('schemes.show', scheme.id)" class="w-full">
-                                <Button class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm">
-                                    Lihat Detail Skema
-                                </Button>
-                            </Link>
+                            <Button 
+                                class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm"
+                                @click="openRegistrationModal(scheme)"
+                                :disabled="!hasProfile"
+                            >
+                                {{ hasProfile ? 'Daftar Sertifikasi' : 'Lengkapi Profil Terlebih Dahulu' }}
+                            </Button>
+                            <Button variant="outline" class="w-full" @click="openRegistrationModal(scheme)">
+                                <BookOpen class="h-4 w-4 mr-2" />
+                                Lihat Detail Skema
+                            </Button>
                         </div>
                     </div>
                 </div>
@@ -286,4 +311,59 @@ onUnmounted(() => {
             <ChevronUp class="h-6 w-6" />
         </button>
     </transition>
+
+    <!-- Registration Modal -->
+    <Dialog :open="showRegistrationModal" @update:open="closeRegistrationModal">
+        <DialogContent class="sm:max-w-[600px]">
+            <DialogHeader>
+                <DialogTitle>Detail Skema Sertifikasi</DialogTitle>
+                <DialogDescription v-if="selectedScheme">
+                    {{ selectedScheme.code }} - {{ selectedScheme.name }}
+                </DialogDescription>
+            </DialogHeader>
+
+            <div class="py-4" v-if="selectedScheme">
+                <!-- Scheme Details -->
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-medium text-gray-900">Informasi Skema</h3>
+                        <p class="mt-1 text-gray-600">{{ selectedScheme.summary }}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-medium text-gray-900">Unit Kompetensi</h3>
+                        <div class="mt-2 space-y-2">
+                            <div v-for="unit in selectedScheme.units" :key="unit.id"
+                                class="p-3 bg-gray-50 rounded-lg">
+                                <p class="font-medium text-gray-800">{{ unit.code }} - {{ unit.name }}</p>
+                                <!-- <p class="text-sm text-gray-600 mt-1">{{ unit.description }}</p> -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registration Section -->
+                    <div class="pt-4 border-t">
+                        <div v-if="!hasProfile" class="flex items-start space-x-3 text-amber-600 bg-amber-50 p-4 rounded-lg">
+                            <AlertCircle class="h-5 w-5 flex-shrink-0" />
+                            <div>
+                                <h4 class="font-medium">Profil Belum Lengkap</h4>
+                                <p class="text-sm mt-1">Anda harus melengkapi profil terlebih dahulu sebelum dapat mendaftar sertifikasi.</p>
+                                <Link :href="route('profile.index')" class="text-sm font-medium hover:underline mt-2 inline-block">
+                                    Lengkapi Profil
+                                </Link>
+                            </div>
+                        </div>
+                        <div v-else>
+                            <Button 
+                                class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm"
+                                :href="route('schemes.register', selectedScheme.id)"
+                            >
+                                Daftar Sertifikasi
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </DialogContent>
+    </Dialog>
 </template>

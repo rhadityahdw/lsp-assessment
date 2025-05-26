@@ -97,7 +97,6 @@ class SchemeService
         return DB::transaction(function () use ($id) {
             $scheme = Scheme::findOrFail($id);
 
-            // Hapus units
             $scheme->units()->detach();
 
             return $scheme->delete();

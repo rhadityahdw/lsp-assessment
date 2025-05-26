@@ -1,48 +1,52 @@
 <script setup lang="ts">
-import { Label } from '@/components/ui/label';
+import { useFormStore } from '@/pages/stores/formStore';
 import { Card, CardContent } from '@/components/ui/card';
-import InputError from '@/components/InputError.vue';
-import { Select, SelectTrigger, SelectContent, SelectGroup, SelectItem, SelectValue } from '@/components/ui/select';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { computed } from 'vue';
 import { Scheme } from '@/types';
-import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps<{
-    schemes: Scheme[],
-    scheme_id: number
-}>();
+  schemes: Scheme[]
+}>()
 
-const form = useForm({
-    scheme_id: props.scheme_id ?? '',
-});
+const formStore = useFormStore()
 
-
+const modelValue = computed({
+  get: () => formStore.selectedScheme?.id.toString() ?? '',
+  set: (val: string) => {
+    const selected = props.schemes.find(s => s.id.toString() === val)
+    if (selected) {
+      formStore.setScheme(selected)
+    }
+  }
+})
 </script>
 
 <template>
-    <div class="min-h-screen">
-        <div class="container mx-auto max-w-7xl py-8 px-4">
-            <Card>
-                <CardContent>
-                    <form @submit.prevent="">
-                        <div class="sm:grid-cols-[200px, 1fr] grid grid-cols-1 items-start gap-2 p-2 transition-colors sm:items-center sm:gap-3">
-                                <Label for="borrower_name" class="text-base font-medium">Pilih Skema Sertifikasi</Label>
-                                <Select v-model="form.scheme_id">
-                                    <SelectTrigger class="w-full">
-                                        <SelectValue placeholder="Pilih skema" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectGroup>
-                                            <SelectItem v-if="schemes" v-for="scheme in schemes" :key="scheme.id" :value="scheme.id">
-                                                {{ scheme.name }}
-                                            </SelectItem>
-                                        </SelectGroup>
-                                    </SelectContent>
-                                </Select>
-                                <InputError :message="form.errors.scheme_id" />
-                            </div>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
-    </div>
+  <Card>
+    <CardContent class="pt-6">
+      <div class="grid gap-4">
+        <Label class="text-base font-medium">Pilih Skema Sertifikasi</Label>
+
+        <Select v-model="modelValue">
+          <SelectTrigger>
+            <SelectValue placeholder="Pilih skema" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup v-if="schemes.length > 0">
+              <SelectItem 
+                v-for="scheme in schemes" 
+                :key="scheme.id" 
+                :value="scheme.id.toString()"
+              >
+                {{ scheme.name }}
+              </SelectItem>
+            </SelectGroup>
+            <p v-else class="px-2 py-1 text-sm text-gray-500">Tidak ada skema tersedia.</p>
+          </SelectContent>
+        </Select>
+      </div>
+    </CardContent>
+  </Card>
 </template>

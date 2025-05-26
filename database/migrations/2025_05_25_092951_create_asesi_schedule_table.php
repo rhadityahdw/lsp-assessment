@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_files', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('file_type', ['ktp', 'ijazah', 'pas_foto', 'bukti_kerja', 'portofolio']);
-            $table->text('file_path');
+        Schema::create('asesi_schedule', function (Blueprint $table) {
+            $table->foreignId('asesi_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('schedule_id')->constrained('schedules')->cascadeOnDelete();
+            $table->integer('score');
+            $table->text('notes');
             $table->timestamps();
         });
     }
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_files');
+        Schema::dropIfExists('asesi_schedule');
     }
 };

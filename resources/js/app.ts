@@ -9,6 +9,7 @@ import { initializeTheme } from './composables/useAppearance';
 import Toast from 'vue-toastification';
 import 'vue-toastification/dist/index.css';
 import { createPinia } from 'pinia';
+import { permissionDirective } from './directives/permission';
 
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
@@ -46,6 +47,7 @@ createInertiaApp({
     setup({ el, App, props, plugin }) {
         createApp({ render: () => h(App, props) })
             .use(plugin)
+            .directive('permission', permissionDirective)
             .use(ZiggyVue)
             .use(pinia)
             .use(Toast, toastOptions)

@@ -3,37 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AssessmentRequest;
 use App\Models\Assessment;
-use App\Services\AssessmentService;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class AssessmentController extends Controller
 {
-    protected $assessmentService;
-
-    public function __construct(AssessmentService $assessmentService)
-    {
-        $this->assessmentService = $assessmentService;
-    }
-
-    /**
-     * Display a listing of the assessments
-     * 
-     * @return \Inertia\Response
-     */
     public function index()
     {
-        $assessments = Assessment::all();
+        $assessments = Assessment::with('schemes')->get();
 
         return Inertia::render('assessments/Index', [
             'assessments' => $assessments,
         ]);
     }
 
-    /**
-     * Show the form for creating a new assessment
-     */
     public function create()
     {
         return Inertia::render('assessments/Create', [
@@ -42,100 +27,51 @@ class AssessmentController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created assessment in storage
-     * 
-     * @param \Illuminate\Http\Request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(Request $request)
+    public function store(AssessmentRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'link' => 'required|string|max:255',
-        ]);
-
-        $assessmentData = [
-            'name' => $validated['name'],
-            'type' => $validated['type'],
-            'link' => $validated['link']
-        ];
-
-        $this->assessmentService->createAssessment($assessmentData);
+        DB::transaction(function () use ($request) {
+            Assessment::create([
+                'scheme_id' => $request->scheme_id,
+                'name' => $request->name,
+                'type' => $request->type,
+                'link' => $request->link,
+                'created_by' => auth()->user->id,
+            ]);
+        });
 
         return redirect()->route('assessments.index')
-            ->with('message', 'Assessment berhasil dibuat');
+            ->with('success', 'Assessment created successfully');
     }
 
-    /**
-     * Display the specified assessment
-     *
-     * @param int $id
-     * @return \Inertia\Response
-     */
-    public function show($id)
+    public function edit(Assessment $assessment)
     {
-        $assessment = $this->assessmentService->getAssessmentById($id);
-
-        return Inertia::render('assessments/Show', [
-            'assessment' => $assessment,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified assessment
-     * 
-     * @param int $id
-     * @return \Inertia\Response
-     */
-    public function edit($id)
-    {
-        $assessment = $this->assessmentService->getAssessmentById($id);
-
         return Inertia::render('assessments/Edit', [
-            'assessment' => $assessment,
+            'assessment' => $assessment->load('schemes'),
         ]);
     }
 
-    /**
-     * Update the specified assessment in storage
-     *
-     * @param \Illuminate\Http\Request
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
+    public function update(AssessmentRequest $request, Assessment $assessment)
     {
-        $validated = $request->validate([
-            'name' =>'required|string|max:255',
-            'type' =>'required|string|max:255', 
-            'link' =>'required|string|max:255',
-        ]);
-
-        $assessmentData = [
-            'name' => $validated['name'],
-            'type' => $validated['type'],
-            'link' => $validated['link']
-        ];
-
-        $this->assessmentService->updateAssessment($id, $assessmentData);
+        DB::transaction(function () use ($request, $assessment) {
+            $assessment->update([
+                'scheme_id' => $request->scheme_id,
+                'name' => $request->name,
+                'type' => $request->type,
+                'link' => $request->link,
+            ]);
+        });
 
         return redirect()->route('assessments.index')
-            ->with('message', 'Assessment berhasil diperbarui');
+            ->with('success', 'Assessment updated successfully');
     }
 
-    /**
-     * Remove the specified assessment from storage
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy($id)
+    public function destroy(Assessment $assessment)
     {
-        $this->assessmentService->deleteAssessment($id);
+        DB::transaction(function () use ($assessment) {
+            $assessment->delete();
+        });
 
         return redirect()->route('assessments.index')
-            ->with('message', 'Assessment berhasil dihapus');
+            ->with('success', 'Assessment deleted successfully');
     }
 }

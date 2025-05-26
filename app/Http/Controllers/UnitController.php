@@ -3,38 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\UnitService;
-use Illuminate\Http\Request;
+use App\Http\Requests\UnitRequest;
+use App\Models\Unit;
+use App\Models\PreAssessment;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class UnitController extends Controller
 {
-    protected $unitService;
-
-    public function __construct(UnitService $unitService)
-    {
-        $this->unitService = $unitService;
-    }
-
-    /**
-     * Get all units
-     * 
-     * @return \Inertia\Response
-     */
     public function index()
     {
-        $units = $this->unitService->getAllUnits();
+        $units = Unit::with(['schemes', 'preAssessments'])->get();
 
         return Inertia::render('units/Index', [
             'units' => $units
         ]);
     }
 
-    /**
-     * Show the form for creating a new unit
-     * 
-     * @return \Inertia\Response
-     */
     public function create()
     {
         return Inertia::render('units/Create', [
@@ -43,101 +28,68 @@ class UnitController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created unit in storage
-     * 
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function store(Request $request)
+    public function store(UnitRequest $request)
     {
-        $validated = $request->validate([
-            'code' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
-            'pre_assessments' => 'required|array|min:1',
-            'pre_assessments.*.question' =>'required|string',
-            'pre_assessments.*.expected_answer' =>'required|in:yes,no',
-        ]);
+        DB::transaction(function () use ($request) {
+            $unit = Unit::create([
+                'code' => $request->code,
+                'name' => $request->name,
+            ]);
 
-        $unitData = [
-            'code' => $validated['code'],
-            'name' => $validated['name'],
-        ];
+            foreach ($request->pre_assessments as $assessment) {
+                PreAssessment::create([
+                    'unit_id' => $unit->id,
+                    'question' => $assessment['question'],
+                    'expected_answer' => $assessment['expected_answer'],
+                ]);
+            }
+        });
 
-        $this->unitService->createUnit($unitData, $validated['pre_assessments']);
-
-        return redirect()->route('units.index')->with('success', 'Unit created successfully.');
+        return redirect()->route('units.index')
+            ->with('success', 'Unit created successfully');
     }
 
-    /**
-     * Display the specified unit
-     *
-     * @param  int  $id
-     * @return \Inertia\Response
-     */
-    public function show($id)
+    public function edit(Unit $unit)
     {
-        $unit = $this->unitService->getUnitById($id);
-
-        return Inertia::render('units/Show', [
-            'unit' => $unit,
-            'pre_assessments' => $unit->pre_assessments,
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified unit
-     *
-     * @param  int  $id
-     * @return \Inertia\Response
-     */
-    public function edit($id)
-    {
-        $unit = $this->unitService->getUnitById($id);
-
         return Inertia::render('units/Edit', [
-            'unit' => $unit
+            'unit' => $unit->load(['schemes', 'preAssessments']),
         ]);
     }
 
-    /**
-     * Update the specified unit in storage
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function update(Request $request, $id)
+    public function update(UnitRequest $request, Unit $unit)
     {
-        $validated = $request->validate([
-            'code' =>'required|string|max:255',
-            'name' =>'required|string|max:255',
-            'pre_assessments' =>'required|array|min:1',
-            'pre_assessments.*.id' =>'nullable|exists:pre_assessments,id',
-            'pre_assessments.*.question' =>'required|string|max:255',
-            'pre_assessments.*.expected_answer' =>'required|string|max:255',
-        ]);
+        DB::transaction(function () use ($request, $unit) {
+            $unit->update([
+                'code' => $request->code,
+                'name' => $request->name,
+            ]);
 
-        $unitData = [
-            'code' => $validated['code'],
-            'name' => $validated['name'],
-        ];
+            // Delete existing pre-assessments
+            $unit->preAssessments()->delete();
 
-        $this->unitService->updateUnit($id, $unitData, $validated['pre_assessments']);
+            // Create new pre-assessments
+            foreach ($request->pre_assessments as $assessment) {
+                PreAssessment::create([
+                    'unit_id' => $unit->id,
+                    'question' => $assessment['question'],
+                    'expected_answer' => $assessment['expected_answer'],
+                ]);
+            }
+        });
 
-        return redirect()->route('units.index')->with('success', 'Unit updated successfully.');
+        return redirect()->route('units.index')
+            ->with('success', 'Unit updated successfully');
     }
 
-    /**
-     * Remove the specified unit from storage
-     * 
-     * @param  int  $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function destroy($id)
+    public function destroy(Unit $unit)
     {
-        $this->unitService->deleteUnit($id);
+        DB::transaction(function () use ($unit) {
+            $unit->preAssessments()->delete();
+            $unit->schemes()->detach();
+            $unit->delete();
+        });
 
-        return redirect()->route('units.index')->with('success', 'Unit deleted successfully.');
+        return redirect()->route('units.index')
+            ->with('success', 'Unit deleted successfully');
     }
 }

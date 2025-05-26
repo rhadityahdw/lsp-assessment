@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('attempt_id')->constrained('attempts')->cascadeOnDelete();
             $table->foreignId('assessment_id')->constrained('assessments')->cascadeOnDelete();
             $table->foreignId('asesor_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('asesi_id')->constrained('users')->cascadeOnDelete();
             $table->dateTime('schedule_time');
             $table->string('location');
             $table->enum('status', ['scheduled', 'completed', 'cancelled'])->default('scheduled');

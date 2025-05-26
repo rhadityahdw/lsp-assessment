@@ -69,6 +69,7 @@ export interface Scheme {
     type: string;
     document_path: Text;
     summary: Text;
+    units: Unit[];
     created_at: string;
     updated_at: string;
 }
@@ -81,6 +82,10 @@ export interface Unit {
     scheme_id: number;
     scheme: Scheme;
     pre_assessments: PreAssessment[];
+    pivot: {
+        scheme_id: number
+        unit_id: number
+    }
     created_at: string;
     updated_at: string;
 }

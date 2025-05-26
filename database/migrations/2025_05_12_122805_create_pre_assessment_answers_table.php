@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('attempt_id')->constrained('attempts')->cascadeOnDelete();
             $table->foreignId('pre_assessment_id')->constrained('pre_assessments')->cascadeOnDelete();
-            $table->enum('answer', ['yes', 'no']);
+            $table->boolean('answer');
             $table->timestamps();
         });
     }

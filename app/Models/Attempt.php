@@ -7,7 +7,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attempt extends Model
 {
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id',
+        'scheme_id',
+        'ktp',
+        'ijazah',
+        'pas_foto',
+        'bukti_kerja',
+        'portofolio',
+        'status',
+    ];
 
     public function user(): BelongsTo
     {

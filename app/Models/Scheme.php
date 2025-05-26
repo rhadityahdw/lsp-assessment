@@ -25,4 +25,16 @@ class Scheme extends Model
     {
         return $this->belongsToMany(Unit::class, 'scheme_units');
     }
+
+    public function preAssessments()
+    {
+        return $this->hasManyThrough(
+            PreAssessment::class,
+            Unit::class,
+            'scheme_id',
+            'unit_id',
+            'id',
+            'id',
+        );
+    }
 }

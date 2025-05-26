@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('unit_id')->constrained('units')->cascadeOnDelete();
             $table->text('question');
-            $table->enum('expected_answer', ['yes', 'no']);
             $table->timestamps();
         });
     }
