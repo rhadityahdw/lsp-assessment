@@ -9,13 +9,11 @@ interface Props {
     showEmail?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
     showEmail: false,
 });
 
 const { getInitials } = useInitials();
-
-console.log(props.user)
 </script>
 
 <template>
