@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('pas_foto');
             $table->string('bukti_kerja')->nullable();
             $table->string('portofolio')->nullable();
-            $table->enum('status', ['submitted', 'approved', 'rejected']);
+            $table->enum('status', ['submitted', 'approved', 'rejected'])->default('submitted');
             $table->text('notes')->nullable();
             $table->timestamps();
         });

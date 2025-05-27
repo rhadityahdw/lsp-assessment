@@ -22,6 +22,12 @@ Route::middleware('auth')->group(function () {
     })->name('skema');
 
     Route::get('pendaftaran', [AttemptController::class, 'create'])->name('pendaftaran');
+    Route::post('attempt', [AttemptController::class, 'store'])->name('attempt.store');
+    Route::get('success', fn () => Inertia::render('pendaftaran/Success'))->name('success');
+
+    Route::get('attempts', [AttemptController::class, 'index'])->name('attempts.index');
+    Route::get('attempts/{id}', [AttemptController::class, 'show'])->name('attempts.show');
+    Route::post('attempts/{id}/verify', [AttemptController::class, 'verify'])->name('attempts.verify');
 
     Route::middleware('verified')->group(function () {
         Route::middleware('role:admin')->group(function () {

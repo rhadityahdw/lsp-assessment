@@ -22,6 +22,11 @@ class ProfileRequest extends FormRequest
             'address' => ['required', 'string'],
             'phone_number' => ['required', 'string', 'max:15'],
             'education' => ['required', 'string'],
+            'job_title' => ['required','string'],
+            'company_name' => ['nullable','string'],
+            'company_address' => ['nullable','string'],
+            'company_phone' => ['nullable','string','max:15'],
+            'company_email' => ['nullable','string','email'],
         ];
     }
 }

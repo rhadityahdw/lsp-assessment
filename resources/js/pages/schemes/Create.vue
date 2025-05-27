@@ -56,7 +56,6 @@ const handleUnitSelection = (unitId: number, checked: boolean): void => {
 };
 
 const submit = (): void => {
-  console.log('Form data:', form);
   form.post(route('schemes.store'));
 };
 </script>

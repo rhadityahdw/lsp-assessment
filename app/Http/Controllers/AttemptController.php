@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Attempt;
 use App\Http\Controllers\Controller;
-use App\Models\PreAssessmentAnswer;
+use App\Http\Requests\StoreAttemptRequest;
+use App\Http\Resources\SchemeResource;
+use App\Services\AttemptService;
 use App\Services\SchemeService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -12,52 +13,68 @@ use Inertia\Inertia;
 class AttemptController extends Controller
 {
     public function __construct(
-        protected SchemeService $schemeService
+        protected SchemeService $schemeService,
+        protected AttemptService $attemptService
     ) {}
+
+    public function index()
+    {
+        $attempts = $this->attemptService->getAllAttempts();
+
+        return Inertia::render('attempts/Index', [
+            'attempts' => $attempts,
+        ]);
+    }
 
     public function create(Request $request)
     {
-        $schemes = $this->schemeService->getAllSchemes($request->scheme_id);
+        $schemes = $this->schemeService->getSchemesWithUnitsAndPreAssessments($request->scheme_id);
         
         return Inertia::render('Pendaftaran', [
-            'schemes' => $schemes,
+            'schemes' => SchemeResource::collection($schemes)->resolve(),
         ]);
     }
 
     /**
      * Simpan data pendaftaran ke attempt
      */
-    public function store(Request $request)
+    public function store(StoreAttemptRequest $request)
+    {
+        $this->attemptService->createAttempt(
+            $request->validated(),
+            $request->user()->id
+        );
+
+        return redirect()->route('success')->with('success', 'Pendaftaran berhasil');
+    }
+
+    /**
+     * Tampilkan hasil pendaftaran berdasarkan ID
+     */
+    public function show(int $id)
+    {
+        $attempt = $this->attemptService->getAttemptById($id);
+
+        return Inertia::render('attempts/Show', [
+            'attempt' => $attempt,
+        ]);
+    }
+
+    /**
+     * Verifikasi pendaftaran: ubah status menjadi 'diterima' atau 'ditolak'
+     */
+    public function verify(Request $request, int $id)
     {
         $request->validate([
-            'scheme_id' => 'required|exists:schemes,id',
-            'ktp' => 'required|file',
-            'ijazah' => 'required|file',
-            'pas_foto' => 'required|file',
-            'bukti_kerja' => 'nullable|file',
-            'portofolio' => 'nullable|file',
-            'answers' => 'required|array',
+            'status' => 'required|in:approved,rejected',
         ]);
 
-        $attempt = Attempt::create([
-            'user_id' => auth()->user->id,
-            'scheme_id' => $request->scheme_id,
-            'ktp' => $request->file('ktp')->store('documents'),
-            'ijazah' => $request->file('ijazah')->store('documents'),
-            'pas_foto' => $request->file('pas_foto')->store('documents'),
-            'bukti_kerja' => $request->file('bukti_kerja')->store('documents'),
-            'portofolio' => $request->file('portofolio')->store('documents'),
-            'status' => 'submitted',
-        ]);
+        $updated = $this->attemptService->updateStatus($id, $request->input('status'));
 
-        foreach ($request->pre_assessments as $answer) {
-            PreAssessmentAnswer::create([
-                'attempt_id' => $attempt->id,
-                'pre_assessment_id' => $answer['id'],
-                'answer' => $answer['answer'],
-            ]);
+        if (!$updated) {
+            return redirect()->back()->with('error', 'Pendaftaran tidak ditemukan atau gagal diperbarui');
         }
 
-        return redirect()->back()->with('success', 'Pendaftaran berhasil');
+        return redirect()->back()->with('success', 'Status pendaftaran berhasil diperbarui');
     }
 }

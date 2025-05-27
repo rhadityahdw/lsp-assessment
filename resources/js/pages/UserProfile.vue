@@ -3,18 +3,17 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle} from '@/components/ui/card';
 import InputError from '@/components/InputError.vue';
 import { onMounted, ref } from 'vue';
 import Navbar from '@/components/Navbar.vue';
 import { Profile, User } from '@/types';
 import { useToast } from 'vue-toastification';
 import Footer from '@/components/Footer.vue';
-import { Textarea } from '@/components/ui/textarea';
 
 const props = defineProps<{
-    user: User;
     profile: Profile | null;
 }>();
 
@@ -49,10 +48,10 @@ onMounted(() => {
         form.phone_number = props.profile.phone_number;
         form.education = props.profile.education;
         form.job_title = props.profile.job_title;
-        form.company_name = props.profile.company_name;
-        form.company_address = props.profile.company_address;
-        form.company_phone = props.profile.company_phone;
-        form.company_email = props.profile.company_email;
+        form.company_name = props.profile.company_name ?? '';
+        form.company_address = props.profile.company_address ?? '';
+        form.company_phone = props.profile.company_phone ?? '';
+        form.company_email = props.profile.company_email ?? '';
     }
 });
 

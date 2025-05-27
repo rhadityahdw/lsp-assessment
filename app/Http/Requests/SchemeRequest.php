@@ -20,7 +20,7 @@ class SchemeRequest extends FormRequest
         return [
             'code' => ['required', 'string', 'max:50', $uniqueRule],
             'name' => 'required|string|max:255',
-            'type' => 'required|string|in:Okupasi,KKNI,Klaster',
+            'type' => 'required|string',
             'unit_ids' => 'required|array',
             'unit_ids.*' => 'exists:units,id',
             'document_path' => 'nullable|string|max:255',

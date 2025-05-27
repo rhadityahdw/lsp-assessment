@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\InvalidUnitsException;
 use App\Models\Scheme;
 use App\Models\Unit;
 use Illuminate\Database\Eloquent\Collection;
@@ -10,96 +11,82 @@ use Illuminate\Support\Facades\Log;
 
 class SchemeService
 {
-    /**
-     * Get all schemes
-     *
-     * @return Collection<int, Scheme>
-     */
     public function getAllSchemes(): Collection
     {
-        return Scheme::with('units')->get();
+        return Scheme::with('units')
+            ->orderBy('created_at', 'desc')
+            ->get();
     }
 
-    /**
-     * Get scheme by ID with units
-     * 
-     * @param int $id
-     * @return Scheme
-     */
-    public function getSchemeById(int $id): Scheme
+    public function createScheme(array $data, array $unitIds): Scheme
     {
-        return Scheme::with('units')->findOrFail($id);
-    }
-
-    /**
-     * Create a new scheme
-     * 
-     * @param array $schemeData
-     * @return Scheme
-     */
-
-    public function createScheme(array $schemeData, array $unitIds = []): Scheme
-    {
-        return DB::transaction(function () use ($schemeData, $unitIds) {
-            Log::debug('Creating scheme with units:', ['unit_ids' => $unitIds]);
-
-            $scheme = Scheme::create($schemeData);
-
-            if (!empty($unitIds)) {
-                $existingUnitIds = Unit::whereIn('id', $unitIds)->pluck('id')->toArray();
-                if (count($existingUnitIds) !== count($unitIds)) {
-                    throw new \Exception('Some units do not exist');
-                }
-                $scheme->units()->attach($existingUnitIds);
-            }
-
+        return DB::transaction(function () use ($data, $unitIds) {
+            $scheme = Scheme::create($data);
+            $this->validateAndAttachUnits($scheme, $unitIds);
+            
+            Log::info('Scheme created', [
+                'scheme_id' => $scheme->id,
+                'units' => $unitIds
+            ]);
+            
             return $scheme->load('units');
         });
     }
 
-    /**
-     * Update a scheme
-     * 
-     * @param array $schemeData
-     * @param array $unitIds
-     * @return Scheme
-     */
-    public function updateScheme(int $id, array $schemeData, array $unitIds = []): Scheme
+    public function updateScheme(int $id, array $data, array $unitIds): Scheme
     {
-        return DB::transaction(function () use ($id, $schemeData, $unitIds) {
+        return DB::transaction(function () use ($id, $data, $unitIds) {
             $scheme = Scheme::findOrFail($id);
-            $scheme->update($schemeData);
-
-            // Sync units
-            if (!empty($unitIds)) {
-                $existingUnitIds = Unit::whereIn('id', $unitIds)->pluck('id')->toArray();
-                if (count($existingUnitIds) !== count($unitIds)) {
-                    $invalidIds = array_diff($unitIds, $existingUnitIds);
-                    throw new \InvalidArgumentException('Invalid unit IDs: ' . implode(', ', $invalidIds));
-                }
-                $scheme->units()->sync($existingUnitIds);
-            } else {
-                $scheme->units()->sync([]);
-            }
-
+            $scheme->update($data);
+            $this->validateAndSyncUnits($scheme, $unitIds);
+            
+            Log::info('Scheme updated', [
+                'scheme_id' => $id,
+                'changes' => $data
+            ]);
+            
             return $scheme->load('units');
         });
     }
 
-    /**
-     * Delete a scheme
-     * 
-     * @param int $id
-     * @return bool
-     */
-    public function deleteScheme(int $id): bool
+    public function deleteScheme(int $id): void
     {
-        return DB::transaction(function () use ($id) {
+        DB::transaction(function () use ($id) {
             $scheme = Scheme::findOrFail($id);
-
             $scheme->units()->detach();
-
-            return $scheme->delete();
+            $scheme->delete();
+            
+            Log::info('Scheme deleted', ['scheme_id' => $id]);
         });
+    }
+
+    /**
+     * Ambil semua skema lengkap dengan unit dan pre asesmen-nya
+     */
+    public function getSchemesWithUnitsAndPreAssessments()
+    {
+        return Scheme::with('units.preAssessments')->get();
+    }
+
+    protected function validateAndAttachUnits(Scheme $scheme, array $unitIds): void
+    {
+        $existingUnitIds = Unit::whereIn('id', $unitIds)->pluck('id');
+        
+        if ($existingUnitIds->count() !== count($unitIds)) {
+            throw new InvalidUnitsException('Invalid unit IDs provided');
+        }
+        
+        $scheme->units()->attach($existingUnitIds);
+    }
+
+    protected function validateAndSyncUnits(Scheme $scheme, array $unitIds): void
+    {
+        $existingUnitIds = Unit::whereIn('id', $unitIds)->pluck('id');
+        
+        if ($existingUnitIds->count() !== count($unitIds)) {
+            throw new InvalidUnitsException('Invalid unit IDs provided');
+        }
+        
+        $scheme->units()->sync($existingUnitIds);
     }
 }

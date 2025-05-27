@@ -5,55 +5,44 @@ namespace App\Http\Controllers;
 use App\Models\Profile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProfileRequest;
+use App\Services\ProfileService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        protected ProfileService $profileService
+    ) {}
+
     public function index()
     {
         $user = Auth::user();
-        $profile = $user->profile;
         
         return Inertia::render('UserProfile', [
-            'profile' => $profile,
+            'user' => $user->load(['roles', 'profile']),
+            'profile' => $this->profileService->getProfileWithRelations($user),
         ]);
     }
 
     public function store(ProfileRequest $request)
     {
-        $user = Auth::user();
-
         try {
-            if($user->profile) {
-                throw new \Exception('User already has a profile');
-            }
-
-            DB::transaction(function () use ($user, $request) {
-                $profileData = $request->validated();
-                $profileData['user_id'] = $user->id;
-                
-                Profile::create($profileData);
-            });
-
-            return redirect()->back()->with('success', 'Profile successfully created');
+            $this->profileService->createProfile(Auth::user(), $request->validated());
+            return redirect()->route('home')->with('success', 'Profile created successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors('profile', $e->getMessage());
+            return redirect()->back()->withErrors(['profile' => $e->getMessage()]);
         }
     }
 
     public function update(ProfileRequest $request, Profile $profile)
     {
         try {
-            DB::transaction(function () use ($profile, $request) {
-                $profileData = $request->validated();
-                $profile->update($profileData);
-            });
-
-            return redirect()->back()->with('success', 'Profile successfully updated');
+            $this->profileService->updateProfile($profile, $request->validated());
+            return redirect()->route('home')->with('success', 'Profile updated successfully');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors('profile', $e->getMessage());
+            return redirect()->back()->withErrors(['profile' => $e->getMessage()]);
         }
     }
 }

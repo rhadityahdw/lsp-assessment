@@ -56,6 +56,26 @@ const getCompetencyUnits = () => {
 <template>
   <Card>
     <CardContent class="space-y-6">
+       <!-- Bagian Unit Kompetensi -->
+       <div v-if="getCompetencyUnits().length > 0">
+        <h2 class="text-lg font-semibold mb-4">Unit Kompetensi {{ formStore.selectedScheme?.name }}</h2>
+        <ul class="list-disc pl-6 space-y-2">
+          <li v-for="(unit, index) in getCompetencyUnits()" :key="index">
+            {{ unit.code }} - {{ unit.name }}
+          </li>
+        </ul>
+      </div>
+      <!-- Informasi Upload -->
+      <div class="bg-blue-50 p-4 rounded-lg">
+        <h3 class="font-medium mb-2">Ketentuan Upload:</h3>
+        <ul class="list-disc pl-6 space-y-1 text-sm">
+          <li>Ukuran maksimal per file: 2MB</li>
+          <li>Format file yang diterima: JPG, PNG, PDF, ZIP</li>
+          <li>Untuk multiple file, kompres dalam format ZIP</li>
+          <li>Pastikan dokumen terbaca dengan jelas</li>
+        </ul>
+      </div>
+
       <!-- Bagian Persyaratan Administratif -->
       <div>
         <h2 class="text-lg font-semibold mb-4">Persyaratan Administratif</h2>
@@ -74,27 +94,7 @@ const getCompetencyUnits = () => {
           </div>
         </div>
       </div>
-
-      <!-- Bagian Unit Kompetensi -->
-      <div v-if="getCompetencyUnits().length > 0">
-        <h2 class="text-lg font-semibold mb-4">Unit Kompetensi {{ formStore.selectedScheme?.name }}</h2>
-        <ul class="list-disc pl-6 space-y-2">
-          <li v-for="(unit, index) in getCompetencyUnits()" :key="index">
-            {{ unit.code }} - {{ unit.name }}
-          </li>
-        </ul>
-      </div>
-
-      <!-- Informasi Upload -->
-      <div class="bg-blue-50 p-4 rounded-lg">
-        <h3 class="font-medium mb-2">Ketentuan Upload:</h3>
-        <ul class="list-disc pl-6 space-y-1 text-sm">
-          <li>Ukuran maksimal per file: 2MB</li>
-          <li>Format file yang diterima: JPG, PNG, PDF, ZIP</li>
-          <li>Untuk multiple file, kompres dalam format ZIP</li>
-          <li>Pastikan dokumen terbaca dengan jelas</li>
-        </ul>
-      </div>
+      
     </CardContent>
   </Card>
 </template>

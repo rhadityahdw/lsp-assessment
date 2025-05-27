@@ -6,77 +6,80 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\SchemeRequest;
 use App\Models\Scheme;
 use App\Models\Unit;
-use Illuminate\Http\Client\Request;
-use Illuminate\Support\Facades\DB;
+use App\Services\SchemeService;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class SchemeController extends Controller
 {
+    public function __construct(
+        protected SchemeService $schemeService
+    ) {}
+
     public function index()
     {
-        $schemes = Scheme::with('units')->get();
-
-        return inertia('schemes/Index', [
-            'schemes' => $schemes,
-        ]);
+        $schemes = $this->schemeService->getAllSchemes();
+        return inertia('schemes/Index', compact('schemes'));
     }
 
     public function create()
     {
         $units = Unit::all();
-
-        return Inertia::render('schemes/Create', [
-            'units' => $units,
-        ]);
+        return Inertia::render('schemes/Create', compact('units'));
     }
 
     public function store(SchemeRequest $request)
     {
-        DB::transaction(function () use ($request) {
-            $scheme = Scheme::create($request->validated());
-
-            if (!empty($request->unit_ids)) {
-                $scheme->units()->attach($request->unit_ids);
-            }
-        });
-
-        return redirect()->route('schemes.index')
-            ->with('success', 'Scheme created successfully');
+        try {
+            $this->schemeService->createScheme(
+                $request->validated(),
+                $request->unit_ids
+            );
+            
+            return redirect()->route('schemes.index')
+                ->with('success', 'Scheme created successfully');
+                
+        } catch (\Exception $e) {
+            Log::error('Scheme creation failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to create scheme');
+        }
     }
 
     public function edit(Scheme $scheme)
     {
-        return Inertia::render('schemes/Edit', [
-            'scheme' => $scheme->load('units'),
-            'units' => Unit::all(),
-        ]);
+        $scheme->load('units');
+        $units = Unit::all();
+        return Inertia::render('schemes/Edit', compact('scheme', 'units'));
     }
 
     public function update(SchemeRequest $request, Scheme $scheme)
     {
-        DB::transaction(function () use ($request, $scheme) {
-            $scheme->update($request->validated());
-            $scheme->units()->sync($request->unit_ids);
-        });
-
-        return redirect()->route('schemes.index')
-            ->with('success', 'Scheme updated successfully');
+        try {
+            $this->schemeService->updateScheme(
+                $scheme->id,
+                $request->validated(),
+                $request->unit_ids
+            );
+            
+            return redirect()->route('schemes.index')
+                ->with('success', 'Scheme updated successfully');
+                
+        } catch (\Exception $e) {
+            Log::error('Scheme update failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to update scheme');
+        }
     }
 
     public function destroy(Scheme $scheme)
     {
-        DB::transaction(function () use ($scheme) {
-            $scheme->units()->detach();
-            $scheme->delete();
-        });
-
-        return redirect()->route('schemes.index')
-            ->with('success', 'Scheme deleted successfully');
-    }
-
-    public function getAllPreAssessmentsByScheme(SchemeRequest $request)
-    {
-        $schemes = Scheme::findOrFail($request->id);
-        return $schemes->getPreAssessments();
+        try {
+            $this->schemeService->deleteScheme($scheme->id);
+            return redirect()->route('schemes.index')
+                ->with('success', 'Scheme deleted successfully');
+                
+        } catch (\Exception $e) {
+            Log::error('Scheme deletion failed: ' . $e->getMessage());
+            return back()->with('error', 'Failed to delete scheme');
+        }
     }
 }

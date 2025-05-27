@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { Scheme } from '@/types';
+import { Scheme } from '@/types'
+import { markRaw } from 'vue'
 
 interface DocumentState {
   ktp: File | null
@@ -16,43 +17,57 @@ interface FormState {
   answers: Record<number, boolean>
 }
 
+const initialDocuments = (): DocumentState => ({
+  ktp: null,
+  ijazah: null,
+  pas_foto: null,
+  bukti_kerja: null,
+  portofolio: null,
+})
+
+type DocumentKey = keyof DocumentState;
+
 export const useFormStore = defineStore('form', {
   state: (): FormState => ({
     activeStep: 0,
     selectedScheme: null,
-    documents: {
-      ktp: null,
-      ijazah: null,
-      pas_foto: null,
-      bukti_kerja: null,
-      portofolio: null
-    },
-    answers: {}
+    documents: initialDocuments(),
+    answers: {},
   }),
+
   actions: {
     nextStep() {
-      if (this.activeStep < 2) this.activeStep++
+      if (this.activeStep < 2) {
+        this.activeStep++
+      }
     },
     prevStep() {
-      if (this.activeStep > 0) this.activeStep--
+      if (this.activeStep > 0) {
+        this.activeStep--
+      }
     },
     setScheme(scheme: Scheme) {
       this.selectedScheme = scheme
     },
-    setDocument(payload: { name: keyof DocumentState; file: File }) {
-      this.documents[payload.name] = payload.file
+    setDocument({ name, file }: { name: DocumentKey; file: File }) {
+      this.documents[name] = markRaw(file)
+    },
+    setAnswer(preAssessmentId: number, value: boolean) {
+      this.answers = {
+        ...this.answers,
+        [preAssessmentId]: value
+      };
     },
     reset() {
       this.activeStep = 0
       this.selectedScheme = null
-      this.documents = {
-        ktp: null,
-        ijazah: null,
-        pas_foto: null,
-        bukti_kerja: null,
-        portofolio: null
-      }
+      this.documents = initialDocuments()
       this.answers = {}
-    }
-  }
+    },
+  },
+
+  getters: {
+    isFirstStep: (state) => state.activeStep === 0,
+    isLastStep: (state) => state.activeStep === 2,
+  },
 })

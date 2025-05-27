@@ -12,7 +12,6 @@ class PreAssessment extends Model
     protected $fillable = [
         'unit_id',
         'question',
-        'expected_answer',
     ];
 
     public function unit()

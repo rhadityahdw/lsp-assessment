@@ -10,13 +10,7 @@ class Scheme extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'code',
-        'name',
-        'type',
-        'document_path',
-        'summary',
-    ];
+    protected $guarded = [];
 
     /**
      * Get the units for the scheme.
@@ -28,13 +22,6 @@ class Scheme extends Model
 
     public function preAssessments()
     {
-        return $this->hasManyThrough(
-            PreAssessment::class,
-            Unit::class,
-            'scheme_id',
-            'unit_id',
-            'id',
-            'id',
-        );
+        return $this->units()->with('preAssessments');
     }
 }
