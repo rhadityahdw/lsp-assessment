@@ -7,12 +7,24 @@ import { Button } from '@/components/ui/button';
 import { Search, Filter, BookOpen, Award, Calendar, ChevronUp, AlertCircle } from 'lucide-vue-next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Link } from '@inertiajs/vue3';
-import { Scheme } from '@/types';
+import { Unit } from '@/types';
 
-// Define props to receive data from controller
+interface Scheme {
+    id: number;
+    name: string;
+    code: string;
+    type: string;
+    document_path: string;
+    summary: string;
+    created_at: string;
+    units: Unit[]
+}
+
 const props = defineProps<{
     schemes: Scheme[];
 }>();
+
+console.log('Schemes:', props.schemes);
 
 const { auth }: any = usePage().props;
 const hasProfile = computed(() => auth.user?.profile);
@@ -56,12 +68,14 @@ const filteredSchemes = computed(() => {
         filtered = filtered.filter(scheme => 
             scheme.name.toLowerCase().includes(query) || 
             scheme.code.toLowerCase().includes(query) ||
-            (scheme.summary && scheme.summary.toLowerCase().includes(query))
+            (String(scheme.summary && scheme.summary).toLowerCase().includes(query))
         );
     }
     
     return filtered;
 });
+
+console.log(filteredSchemes.value);
 
 const selectCategory = (categoryId: string) => {
     selectedCategory.value = categoryId;

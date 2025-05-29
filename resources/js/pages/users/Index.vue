@@ -12,10 +12,18 @@ import SearchComponent from '@/components/SearchComponent.vue';
 import { ref, computed } from 'vue';
 
 const props = defineProps<{
-    users: User[];
+    users: Array<{
+        id: number;
+        name: string;
+        email: string;
+        roles: Array<{
+            id: number;
+            name: string;
+        }>;
+    }>;
 }>();
 
-console.log(props.users)
+console.log(props.users);
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: route('dashboard') },
@@ -34,7 +42,7 @@ const filteredUsers = computed(() => {
     return props.users.filter(user => 
         user.name.toLowerCase().includes(query) || 
         user.email.toLowerCase().includes(query) ||
-        user.roles[0].name.toLowerCase().includes(query)
+        (user.roles?.[0]?.name?.toLowerCase() || '').includes(query)
     );
 });
 
@@ -117,9 +125,13 @@ const tableHeaders = ['Name', 'Email', 'Role', ''];
                                 <TableCell>{{ user.name }}</TableCell>
                                 <TableCell>{{ user.email }}</TableCell>
                                 <TableCell>
-                                    <span :class="['px-2 py-1 text-xs font-medium rounded-full', getBadgeRole(user.roles[0].name)]">
+                                    <span 
+                                        v-if="user.roles?.[0]?.name"
+                                        :class="['px-2 py-1 text-xs font-medium rounded-full', getBadgeRole(user.roles[0].name)]"
+                                    >
                                         {{ capitalizeFirstLetter(user.roles[0].name) }}
                                     </span>
+                                    <span v-else class="text-gray-500">No role assigned</span>
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <ActionButtonsComponent 

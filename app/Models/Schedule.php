@@ -13,7 +13,6 @@ class Schedule extends Model
     use HasFactory;
 
     protected $fillable = [
-        'attempt_id',
         'assessment_id',
         'asesor_id',
         'asesi_id',
@@ -37,8 +36,9 @@ class Schedule extends Model
         return $this->belongsTo(User::class, 'asesor_id');
     }
 
-    public function asesi()
+    public function asesis()
     {
-        return $this->belongsTo(User::class, 'asesi_id');
+        return $this->belongsToMany(User::class, 'asesi_schedule', 'schedule_id', 'asesi_id')
+                    ->withPivot('score', 'notes')->withTimestamps();
     }
 }

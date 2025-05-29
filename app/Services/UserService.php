@@ -4,10 +4,21 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Data\UserData;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
+    public function getAllUsers(): Collection
+    {
+        return User::with('roles')->get(); 
+    }
+
+    public function getUserById(int $id): User
+    {
+        return User::with('roles')->findOrFail($id);
+    }
+
     public function createUser(array $data): User
     {
         $user = User::create([

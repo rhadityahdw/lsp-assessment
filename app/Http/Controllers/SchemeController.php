@@ -45,6 +45,15 @@ class SchemeController extends Controller
         }
     }
 
+    public function show($id)
+    {
+        $scheme = $this->schemeService->getSchemeById($id);
+        return Inertia::render('schemes/Show', [
+            'scheme' => $scheme,
+            'units' => $scheme->units,
+        ]);
+    }
+
     public function edit(Scheme $scheme)
     {
         $scheme->load('units');

@@ -5,14 +5,19 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role;
 use App\Http\Requests\UserRequest;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
+    public function __construct(
+        protected UserService $userService
+    ) {}
+
     public function index()
     {
-        $users = User::with('roles')->get();
+        $users = $this->userService->getAllUsers();
 
         return Inertia::render('users/Index', [
             'users' => $users,

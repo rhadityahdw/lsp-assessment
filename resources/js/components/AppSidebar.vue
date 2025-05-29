@@ -5,7 +5,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, User, FilePenLine } from 'lucide-vue-next';
+import { BookOpen, Folder, LayoutGrid, User, FilePenLine, CalendarClock } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
@@ -33,6 +33,11 @@ const mainNavItems: NavItem[] = [
         title: 'Pendaftaran',
         href: route('attempts.index'),
         icon: FilePenLine,
+    },
+    {
+        title: 'Jadwal',
+        href: route('schedules.index'),
+        icon: CalendarClock,
     }
     
 ];

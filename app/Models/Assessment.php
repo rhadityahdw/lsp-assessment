@@ -12,12 +12,17 @@ class Assessment extends Model
     protected $table = 'assessments';
 
     protected $fillable = [
+        'schedule_id',
         'scheme_id',
         'name',
         'type',
         'link',
-        'created_by',
     ];
+
+    public function schedule()
+    {
+        return $this->belongsTo(Schedule::class);
+    }
 
     /**
      * Get the scheme that owns the assessment.

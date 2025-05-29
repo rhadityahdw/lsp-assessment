@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UnitRequest;
+use App\Services\UnitService;
 use App\Models\Unit;
 use App\Models\PreAssessment;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,10 @@ use Inertia\Inertia;
 
 class UnitController extends Controller
 {
+    public function __construct(
+        protected UnitService $unitService
+    ) {}
+
     public function index()
     {
         $units = Unit::with(['schemes', 'preAssessments'])->get();
@@ -47,6 +52,16 @@ class UnitController extends Controller
 
         return redirect()->route('units.index')
             ->with('success', 'Unit created successfully');
+    }
+
+    public function show($id)
+    {
+        $unit = $this->unitService->getUnitById($id);
+
+        return Inertia::render('units/Show', [
+            'unit' => $unit,
+            'pre_assessments' => $unit->pre_assessments,
+        ]);
     }
 
     public function edit(Unit $unit)

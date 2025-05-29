@@ -13,22 +13,27 @@ class SchemeService
 {
     public function getAllSchemes(): Collection
     {
-        return Scheme::with('units')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        return Scheme::with('units')->get();
+    }
+
+    public function getSchemeById(int $id): Scheme
+    {
+        return Scheme::with('units')->findOrFail($id);
     }
 
     public function createScheme(array $data, array $unitIds): Scheme
     {
         return DB::transaction(function () use ($data, $unitIds) {
             $scheme = Scheme::create($data);
-            $this->validateAndAttachUnits($scheme, $unitIds);
-            
-            Log::info('Scheme created', [
-                'scheme_id' => $scheme->id,
-                'units' => $unitIds
-            ]);
-            
+
+            if (!empty($unitIds)) {
+                $existingUnitIds = Unit::whereIn('id', $unitIds)->pluck('id')->toArray();
+                if (count($existingUnitIds) !== count($unitIds)) {
+                    throw new \Exception('Some units do not exist');
+                }
+                $scheme->units()->attach($existingUnitIds);
+            }
+
             return $scheme->load('units');
         });
     }

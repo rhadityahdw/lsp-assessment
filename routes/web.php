@@ -5,6 +5,8 @@ use App\Http\Controllers\SchemeController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\AttemptController;
+use App\Http\Controllers\ScheduleController;
+use App\Services\SchemeService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -18,16 +20,16 @@ Route::middleware('auth')->group(function () {
     })->name('home');
 
     Route::get('skema', function () {
-        return Inertia::render('Scheme', [SchemeController::class, 'get']);
+        $schemes = app(SchemeService::class)->getAllSchemes();
+        return Inertia::render('Scheme', [
+            'schemes' => $schemes
+        ]);
     })->name('skema');
 
     Route::get('pendaftaran', [AttemptController::class, 'create'])->name('pendaftaran');
     Route::post('attempt', [AttemptController::class, 'store'])->name('attempt.store');
     Route::get('success', fn () => Inertia::render('pendaftaran/Success'))->name('success');
 
-    Route::get('attempts', [AttemptController::class, 'index'])->name('attempts.index');
-    Route::get('attempts/{id}', [AttemptController::class, 'show'])->name('attempts.show');
-    Route::post('attempts/{id}/verify', [AttemptController::class, 'verify'])->name('attempts.verify');
 
     Route::middleware('verified')->group(function () {
         Route::middleware('role:admin')->group(function () {
@@ -39,6 +41,11 @@ Route::middleware('auth')->group(function () {
             Route::resource('schemes', SchemeController::class);
             Route::resource('units', UnitController::class);
             Route::resource('assessments', AssessmentController::class);
+            Route::resource('schedules', ScheduleController::class);
+
+            Route::get('attempts', [AttemptController::class, 'index'])->name('attempts.index');
+            Route::get('attempts/{id}', [AttemptController::class, 'show'])->name('attempts.show');
+            Route::post('attempts/{id}/verify', [AttemptController::class, 'verify'])->name('attempts.verify');
         });
     });
 });
