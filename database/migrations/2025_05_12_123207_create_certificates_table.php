@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('scheme_id')->constrained()->cascadeOnDelete();
-            $table->string('nomor_sertifikat')->unique();
+            $table->string('certificate_number')->unique();
             $table->date('issued_at');
             $table->date('expiry_date')->nullable();
             $table->text('file_path');
