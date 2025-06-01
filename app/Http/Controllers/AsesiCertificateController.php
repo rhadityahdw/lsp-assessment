@@ -31,8 +31,10 @@ class AsesiCertificateController extends Controller
         ]);
     }
 
-    public function show(Certificate $certificate): Response
+    public function show(int $id): Response
     {
+        $certificate = $this->certificateService->getCertificateById($id);
+        
         return Inertia::render('CertificateShow', [
             'certificate' => new CertificateResource($certificate->load(['scheme'])),
         ]);

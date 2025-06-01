@@ -25,6 +25,6 @@ const { getInitials } = useInitials();
 
     <div class="grid flex-1 text-left text-sm leading-tight">
         <span class="truncate font-medium">{{ user.name }}</span>
-        <span class="truncate text-xs text-muted-foreground">{{ user.roles }}</span>
+        <span class="truncate text-xs text-muted-foreground">{{ user.roles[0] }}</span>
     </div>
 </template>

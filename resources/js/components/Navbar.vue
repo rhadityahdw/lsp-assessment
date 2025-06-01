@@ -105,12 +105,18 @@ const setActive = (): void => {
                             <div class="p-2 mb-1 bg-gray-50 rounded-md">
                                 <p class="font-medium text-gray-800">{{ authUser.name }}</p>
                                 <p class="text-sm text-gray-500">{{ authUser.email }}</p>
-                                <p class="text-xs text-cyan-600 mt-1 font-medium">{{ authUser.roles }}</p>
+                                <p class="text-xs text-cyan-600 mt-1 font-medium">{{ authUser.roles[0] }}</p>
                             </div>
                             <Link :href="route('profile.index')">
-                                <DropdownMenuItem class="cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50 rounded-md mt-1">
+                                <DropdownMenuItem class="cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50 rounded-md">
                                     <UserCircle class="h-4 w-4 mr-2 text-gray-500" />
                                     Profil Saya
+                                </DropdownMenuItem>
+                            </Link>
+                            <Link :href="route('asesi.certificates.index')">
+                                <DropdownMenuItem  class="cursor-pointer hover:bg-cyan-50 focus:bg-cyan-50 rounded-md">
+                                    <FileText class="h-4 w-4 mr-2 text-gray-500" />
+                                    Sertifikat
                                 </DropdownMenuItem>
                             </Link>
                             <!-- <Link :href="route('settings')"> -->
@@ -159,7 +165,7 @@ const setActive = (): void => {
                         </Avatar>
                         <div>
                             <p class="font-medium text-gray-800">{{ authUser.name }}</p>
-                            <p class="text-xs text-cyan-600">{{ authUser.roles }}</p>
+                            <p class="text-xs text-cyan-600">{{ authUser.roles[0] }}</p>
                             <p class="text-xs text-gray-500">{{ authUser.email }}</p>
                         </div>
                     </div>

@@ -38,7 +38,9 @@ class AdminCertificateController extends Controller
 
     public function create()
     {
-        $users = UserResource::collection(User::orderBy('name')->get());
+        $users = UserResource::collection(User::whereHas('roles', function ($query) {
+            $query->where('name', 'asesi');
+        })->orderBy('name')->get());
         $schemes = SchemeResource::collection(Scheme::orderBy('name')->get());
 
         return Inertia::render('Certificates/Create', [
@@ -50,8 +52,11 @@ class AdminCertificateController extends Controller
     public function store(StoreCertificateRequest $request): RedirectResponse
     {
         try {
-            $this->certificateService->createCertificate($request->validated());
-
+            $data = $request->validated();
+            $data['file_path'] = $request->file('file_path');
+            
+            $this->certificateService->createCertificate($data);
+    
             return redirect()->route('admin.certificates.index')->with('success', 'Sertifikat berhasil ditambahkan.');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -60,19 +65,21 @@ class AdminCertificateController extends Controller
         }
     }
 
-    public function show(Certificate $certificate): Response
+    public function show(int $id): Response
     {
-        $certificate = $this->certificateService->getCertificateById($certificate->id);
+        $certificate = $this->certificateService->getCertificateById($id);
         
         return Inertia::render('Certificates/Show', [
             'certificate' => new CertificateResource($certificate)
         ]);
     }
 
-    public function edit(Certificate $certificate): Response
+    public function edit(int $id): Response
     {
         $users = UserResource::collection(User::orderBy('name')->get());
         $schemes = SchemeResource::collection(Scheme::orderBy('name')->get());
+
+        $certificate = $this->certificateService->getCertificateById($id);
 
         return Inertia::render('Certificates/Edit', [
             'certificate' => new CertificateResource($certificate),

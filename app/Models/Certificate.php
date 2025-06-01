@@ -23,7 +23,7 @@ class Certificate extends Model
         'expiry_date' => 'date',
     ];  
 
-    public function asesi()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

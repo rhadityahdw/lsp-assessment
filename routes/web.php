@@ -16,6 +16,17 @@ Route::get('unauthorized', function () {
     return Inertia::render('errors/Unauthorized');
 })->name('unauthorized');
 
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('certificates', AdminCertificateController::class);
+    Route::get('certificates/{certificate}/download', [AdminCertificateController::class, 'downloadFile'])->name('certificates.download');
+});
+
+Route::middleware(['auth', 'role:asesi'])->name('asesi.')->group(function () {
+    Route::get('certificates', [AsesiCertificateController::class, 'index'])->name('certificates.index');
+    Route::get('certificates/{certificate}', [AsesiCertificateController::class, 'show'])->name('certificates.show');
+    Route::get('certificates/{certificate}/download', [AsesiCertificateController::class, 'downloadFile'])->name('certificates.download');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return Inertia::render('Home');
@@ -52,16 +63,7 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-Route::middleware(['auth', 'role:admin'])->name('admin.')->group(function () {
-    Route::resource('certificates', AdminCertificateController::class);
-    Route::get('certificates/{certificate}/download', [AdminCertificateController::class, 'downloadFile'])->name('certificates.download');
-});
 
-Route::middleware(['auth', 'role:asesi'])->name('asesi.')->group(function () {
-    Route::get('certificates', [AsesiCertificateController::class, 'index'])->name('certificates.index');
-    Route::get('certificates/{certificate}', [AsesiCertificateController::class, 'show'])->name('certificates.show');
-    Route::get('certificates/{certificate}/download', [AsesiCertificateController::class, 'downloadFile'])->name('certificates.download');
-});
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

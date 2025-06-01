@@ -69,27 +69,14 @@ class CertificateService
         DB::beginTransaction();
 
         try {
-            $filePath = null;
-
-            if (isset($data['file']) && $data['file'] instanceof UploadedFile) {
-                $file = $data['file'];
-
-                /** @var \Illuminate\Http\UploadedFile $file */
-                $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('certificates', $fileName, 'public');
-
-                if (!$filePath) {
-                    throw new \Exception('Gagal mengunggah file sertifikat.');
-                }
-                $data['file_path'] = $filePath;
+            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
+                $data['file_path'] = $this->storeFileIfExists($data['file_path']);
             }
 
             unset($data['file']);
-
             $certificate = $this->certificate->create($data);
 
             DB::commit();
-
             return $certificate;
 
         } catch (\Exception $e) {
@@ -99,98 +86,63 @@ class CertificateService
         }
     }
 
-     /**
-     * Memperbarui data sertifikat dan/atau file.
-     *
-     * @param Certificate $certificate Objek sertifikat yang akan diperbarui.
-     * @param array $data Data yang akan diperbarui.
-     * @return Certificate
-     * @throws \Exception Jika ada masalah dalam proses update atau upload.
-     */
-    public function updateCertificate(Certificate $certificate, array $data): Certificate
-    {
-        DB::beginTransaction();
-
-        try {
-            if (isset($data['file']) && $data['file'] instanceof UploadedFile) {
-
-                if ($certificate->file_path && Storage::disk('public')->exists($certificate->file_path)) {
-                    Storage::disk('public')->delete($certificate->file_path);
-                }
-
-                $file = $data['file'];
-
-                /** @var \Illuminate\Http\UploadedFile $file */
-                $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('certificates', $fileName, 'public');
-
-                if (!$filePath) {
-                    throw new \Exception("Gagal mengunggah file sertifikat baru.");
-                }
-                $data['file_path'] = $filePath;
-            } elseif (array_key_exists('file', $data) && $data['file'] === null) {
-                // Jika 'file' diset null, berarti user ingin menghapus file yang sudah ada
-                if ($certificate->file_path && Storage::disk('public')->exists($certificate->file_path)) {
-                    Storage::disk('public')->delete($certificate->file_path);
-                }
-                $data['file_path'] = null;
-            }
-
-            unset($data['file']);
-
-            $certificate->update($data);
-
-            DB::commit();
-            return $certificate;
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error("Gagal memperbarui sertifikat (ID: {$certificate->id}): " . $e->getMessage(), ['data' => $data]);
-            throw new \Exception("Terjadi kesalahan saat memperbarui sertifikat: " . $e->getMessage());
-        }
-    }
-
     /**
-     * Menghapus sertifikat dan file terkaitnya.
-     *
-     * @param Certificate $certificate Objek sertifikat yang akan dihapus.
-     * @return bool
-     * @throws \Exception Jika ada masalah dalam proses penghapusan.
+     * Delete sertifikat
+     * 
+     * @param Certificate $certificate
+     * @return void
      */
-    public function deleteCertificate(Certificate $certificate): bool
+    public function deleteCertificate(Certificate $certificate)
     {
         DB::beginTransaction();
 
         try {
-            // Hapus file dari penyimpanan jika ada
             if ($certificate->file_path && Storage::disk('public')->exists($certificate->file_path)) {
                 Storage::disk('public')->delete($certificate->file_path);
+                Log::info('File sertifikat dihapus dari storage: ' . $certificate->file_path);
+            } else {
+                Log::warning('File sertifikat tidak ditemukan di storage saat mencoba menghapus: ' . $certificate->file_path);
             }
 
-            $result = $certificate->delete();
+            $result = $certificate->delete(); 
 
             DB::commit();
-            return $result;
 
+            Log::info('Sertifikat dihapus dari database: ' . $certificate->id);
+            return $result;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Gagal menghapus sertifikat (ID: {$certificate->id}): " . $e->getMessage());
+            Log::error("Gagal menghapus sertifikat (ID: {$certificate->id}): " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'certificate_id' => $certificate->id
+            ]);
             throw new \Exception("Terjadi kesalahan saat menghapus sertifikat: " . $e->getMessage());
         }
     }
 
-    /**
-     * Mendapatkan URL publik untuk file sertifikat.
-     *
-     * @param Certificate $certificate
-     * @return string|null
-     */
-    public function getCertificateFileUrl(Certificate $certificate): ?string
+    protected function storeFileIfExists(?UploadedFile $file): ?string
     {
-        if ($certificate->file_path) {
-        return Storage::url($certificate->file_path);
+        if ($file && $file->isValid()) {
+            $userId = request()->input('user_id');
+            $schemeId = request()->input('scheme_id');
+            
+            // Buat struktur direktori: files/certificates/{user_id}/{scheme_id}/
+            $directory = "files/certificates/{$userId}/{$schemeId}";
+            
+            // Generate nama file unik
+            $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+            
+            // Simpan file dan return path relatif (tanpa 'public/')
+            /** @var \Illuminate\Http\UploadedFile $file */
+            $path = $file->storeAs($directory, $fileName, 'public');
+            
+            if (!$path) {
+                throw new \Exception('Gagal menyimpan file sertifikat.');
+            }
+            
+            return $path;
         }
+
         return null;
     }
-
 }
