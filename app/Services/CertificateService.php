@@ -120,6 +120,51 @@ class CertificateService
         }
     }
 
+    /**
+     * Memperbarui sertifikat yang ada.
+     * 
+     * @param Certificate $certificate Sertifikat yang akan diperbarui
+     * @param array $data Data baru untuk sertifikat
+     * @return Certificate
+     * @throws \Exception
+     */
+    public function updateCertificate(Certificate $certificate, array $data): Certificate
+    {
+        DB::beginTransaction();
+
+        try {
+            // Handle file upload if new file is provided
+            if (isset($data['file_path']) && $data['file_path'] instanceof UploadedFile) {
+                // Delete old file if exists
+                if ($certificate->file_path && Storage::disk('public')->exists($certificate->file_path)) {
+                    Storage::disk('public')->delete($certificate->file_path);
+                    Log::info('File sertifikat lama dihapus dari storage: ' . $certificate->file_path);
+                }
+
+                // Store new file
+                $data['file_path'] = $this->storeFileIfExists($data['file_path']);
+            }
+
+            // Remove file key if exists to prevent errors
+            unset($data['file']);
+
+            // Update certificate
+            $certificate->update($data);
+
+            DB::commit();
+            return $certificate->fresh();
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Gagal memperbarui sertifikat (ID: {$certificate->id}): " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'certificate_id' => $certificate->id,
+                'data' => $data
+            ]);
+            throw new \Exception("Terjadi kesalahan saat memperbarui sertifikat: " . $e->getMessage());
+        }
+    }
+
     protected function storeFileIfExists(?UploadedFile $file): ?string
     {
         if ($file && $file->isValid()) {

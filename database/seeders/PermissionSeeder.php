@@ -10,12 +10,9 @@ class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cached roles and permissions
         app()['cache']->forget('spatie.permission.cache');
 
-        // Create permissions
         $permissions = [
-            // Profile permissions
             'view profile',
             'edit profile',
             

@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class AssessmentResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -19,7 +14,16 @@ class AssessmentResource extends JsonResource
             'name' => $this->name,
             'type' => $this->type,
             'link' => $this->link,
-            's'
+            'scheme' => [
+                'id' => $this->scheme->id,
+                'name' => $this->scheme->name,
+            ],
+            'created_by' => [
+                'id' => $this->createdBy->id,
+                'name' => $this->createdBy->name,
+            ],
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
         ];
     }
 }

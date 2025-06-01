@@ -19,12 +19,30 @@ Route::get('unauthorized', function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('certificates', AdminCertificateController::class);
     Route::get('certificates/{certificate}/download', [AdminCertificateController::class, 'downloadFile'])->name('certificates.download');
+    
+    Route::get('assessments', [AssessmentController::class, 'index'])->name('assessments.index');
+    Route::get('assessments/{assessment}', [AssessmentController::class, 'show'])->name('assessments.show');
+    Route::delete('assessments/{assessment}', [AssessmentController::class, 'destroy'])->name('assessments.destroy');
 });
 
 Route::middleware(['auth', 'role:asesi'])->name('asesi.')->group(function () {
     Route::get('certificates', [AsesiCertificateController::class, 'index'])->name('certificates.index');
     Route::get('certificates/{certificate}', [AsesiCertificateController::class, 'show'])->name('certificates.show');
     Route::get('certificates/{certificate}/download', [AsesiCertificateController::class, 'downloadFile'])->name('certificates.download');
+});
+
+Route::middleware(['auth', 'role:asesor'])->name('asesor.')->group(function () {
+    Route::get('dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
+    Route::get('assessments', [AssessmentController::class, 'asesorAssessments'])->name('assessments.index');
+    Route::get('assessments/create', [AssessmentController::class, 'create'])->name('assessments.create');
+    Route::post('assessments', [AssessmentController::class, 'store'])->name('assessments.store');
+    Route::get('assessments/{assessment}', [AssessmentController::class, 'show'])->name('assessments.show');
+    Route::get('assessments/{assessment}/edit', [AssessmentController::class, 'edit'])->name('assessments.edit');
+    Route::put('assessments/{assessment}', [AssessmentController::class, 'update'])->name('assessments.update');
+    Route::delete('assessments/{assessment}', [AssessmentController::class, 'destroy'])->name('assessments.destroy');
 });
 
 Route::middleware('auth')->group(function () {

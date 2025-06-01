@@ -88,6 +88,22 @@ class AdminCertificateController extends Controller
         ]);
     }
 
+    public function update(StoreCertificateRequest $request, Certificate $certificate): RedirectResponse
+    {
+        try {
+            $data = $request->validated();
+            $data['file_path'] = $request->file('file_path');
+
+            $this->certificateService->updateCertificate($certificate, $data);
+
+            return redirect()->route('admin.certificates.index')->with('success', 'Sertifikat berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                             ->with('error', 'Gagal memperbarui sertifikat: '. $e->getMessage())
+                             ->withInput();
+        }
+    }
+
     public function destroy(Certificate $certificate): RedirectResponse
     {
         try {

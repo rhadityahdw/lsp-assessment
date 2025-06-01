@@ -79,10 +79,6 @@ const showEmptySearchMessage = computed(() => {
     return searchQuery.value.length > 0 && filteredCertificates.value.length === 0;
 });
 
-const showEmptyDataMessage = computed(() => {
-    return certificates.length === 0;
-});
-
 const tableHeaders = ['Nama Asesi', 'Skema', 'Nomor Sertifikat', 'Tanggal Terbit', 'Tanggal Kadaluwarsa', ''];
 </script>
 
@@ -113,7 +109,7 @@ const tableHeaders = ['Nama Asesi', 'Skema', 'Nomor Sertifikat', 'Tanggal Terbit
                         <DataTableComponent
                             v-else
                             :headers="tableHeaders"
-                            :items="certificates"
+                            :items="filteredCertificates"
                         >
                             <TableRow v-for="certificate in certificates" :key="certificate.id">
                                 <TableCell>{{ certificate.user.name }}</TableCell>
