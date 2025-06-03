@@ -2,16 +2,16 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useInitials } from '@/composables/useInitials';
 import type { User } from '@/types';
-import { computed } from 'vue';
 
 interface Props {
     user: User;
     showEmail?: boolean;
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
     showEmail: false,
 });
+
 
 const { getInitials } = useInitials();
 </script>

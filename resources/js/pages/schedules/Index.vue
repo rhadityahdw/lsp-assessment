@@ -83,10 +83,6 @@ const tableHeaders = ['Nama Jadwal', 'Skema', 'Nama Asesor', 'Tanggal Pelaksanaa
                             Tidak ada jadwal yang cocok dengan pencarian Anda.
                         </div>
 
-                        <div v-else-if="showEmptyDataMessage" class="text-center py-8 text-gray-500">
-                            Belum ada jadwal yang terdaftar. Silakan tunggu asesi melakukan pendaftaran baru.
-                        </div>
-
                         <DataTableComponent
                             v-else
                             :headers="tableHeaders"

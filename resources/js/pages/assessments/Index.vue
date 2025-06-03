@@ -6,8 +6,9 @@ import SearchComponent from '@/components/SearchComponent.vue';
 import { Card, CardContent } from '@/components/ui/card';
 import { TableCell, TableRow } from '@/components/ui/table';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { Button } from '@/components/ui/button';
 import { BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, PropType, ref } from 'vue';
 
 interface AssessmentItem {
@@ -42,7 +43,18 @@ const props = defineProps({
         required: true,
         default: () => ({ data: [], links: [], meta: {} }) 
     },
+    can: {
+        type: Object as PropType<{
+            create: boolean;
+            edit: boolean;
+            delete: boolean;
+            view: boolean;
+        }>,
+        required: true,
+    }
 });
+
+console.log(props.can);
 
 const assessments = props.assessments.data;
 
@@ -88,8 +100,13 @@ const tableHeaders = ['Judul', 'Nama Asesor', 'Skema', 'Tipe', ''];
         <div class="py-6 md:py-12">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
                 <Card>
-                    <PageHeaderComponent title="Daftar Asesmen" />
-                
+                    <PageHeaderComponent title="Daftar Asesmen">
+                        <Link
+                            v-if="can.create" 
+                            :href="route('assessments.create')">
+                            <Button>Tambah Asesmen</Button>
+                        </Link>
+                    </PageHeaderComponent>
                     <CardContent>
                         <div class="mb-6 max-w-d">
                             <SearchComponent 
@@ -122,10 +139,9 @@ const tableHeaders = ['Judul', 'Nama Asesor', 'Skema', 'Tipe', ''];
                                 </TableCell>
                             </TableRow>
                         </DataTableComponent>
-                </CardContent>
+                    </CardContent>
                 </Card>
             </div>
         </div>
-
     </AppLayout>
 </template>

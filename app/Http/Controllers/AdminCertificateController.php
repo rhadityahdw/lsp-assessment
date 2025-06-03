@@ -25,6 +25,12 @@ class AdminCertificateController extends Controller
         $this->certificateService = $certificateService;
 
         $this->middleware(['auth', 'role:admin']);
+
+        $this->middleware('permission:view certificate')->only(['index', 'show']);
+        $this->middleware('permission:upload certificate')->only(['create','store']);
+        $this->middleware('permission:edit certificate')->only(['edit','update']);
+        $this->middleware('permission:delete certificate')->only(['destroy']);
+        $this->middleware('permission:download certificate')->only(['downloadFile']);
     }
 
     public function index(): Response

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,7 +44,7 @@ const form = useForm({
     schedule_time: '',
     location: '',
     status: 'draft',
-    asesis: []
+    asesis: [] as number[]
 });
 
 const toggleAsesi = (asesiId: number) => {
@@ -56,7 +56,7 @@ const toggleAsesi = (asesiId: number) => {
             selectedAsesis.value.push(asesiId);
         }
     }
-    form.asesis = selectedAsesis.value;
+    form.asesis = [...selectedAsesis.value];
 };
 
 const isAsesiSelected = (asesiId: number) => {
@@ -134,7 +134,7 @@ const submitForm = () => {
                                     >
                                         <Checkbox 
                                             :id="`asesi-${asesi.id}`"
-                                            :checked="isAsesiSelected(asesi.id)"
+                                            :modelValue="isAsesiSelected(asesi.id)"
                                             :disabled="!isAsesiSelected(asesi.id) && selectedAsesis.length >= 10"
                                         />
                                         <Label 
@@ -173,9 +173,11 @@ const submitForm = () => {
                             </div>
                             
                             <div class="flex justify-end space-x-2">
-                                <Button type="button" variant="outline" @click="$inertia.visit(route('schedules.index'))">
-                                    Batal
-                                </Button>
+                                <Link :href="route('schedules.index')">
+                                    <Button type="button" variant="outline">
+                                        Batal
+                                    </Button>
+                                </Link>
                                 <Button type="submit" :disabled="form.processing">
                                     {{ form.processing ? 'Menyimpan...' : 'Simpan Jadwal' }}
                                 </Button>

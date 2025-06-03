@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Assessment;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class AssessmentService
 {
@@ -17,7 +18,13 @@ class AssessmentService
 
     public function getAllAssessments(int $perPage = 10): LengthAwarePaginator
     {
-        return $this->assessment->with(['scheme', 'createdBy'])->paginate($perPage);
+        $query = $this->assessment->with(['scheme', 'createdBy']);
+        
+        if (Auth::user()->hasRole('asesor')) {
+            $query->where('created_by', Auth::id());
+        }
+        
+        return $query->paginate($perPage);
     }
 
     public function getAssessmentById(int $id): ?Assessment
@@ -34,6 +41,10 @@ class AssessmentService
 
     public function createAssessment(array $data): Assessment
     {
+        if (!Auth::user()->can('create assessment')) {
+            throw new \Exception('Unauthorized action.');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -49,6 +60,15 @@ class AssessmentService
 
     public function updateAssessment(Assessment $assessment, array $data): Assessment
     {
+        if (!Auth::user()->can('edit assessment')) {
+            throw new \Exception('Unauthorized action.');
+        }
+
+        // Only allow asesor to edit their own assessments
+        if (Auth::user()->hasRole('asesor') && $assessment->created_by !== Auth::id()) {
+            throw new \Exception('You can only edit your own assessments.');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -64,6 +84,15 @@ class AssessmentService
 
     public function deleteAssessment(Assessment $assessment): bool
     {
+        if (!Auth::user()->can('delete assessment')) {
+            throw new \Exception('Unauthorized action.');
+        }
+
+        // Only allow asesor to delete their own assessments
+        if (Auth::user()->hasRole('asesor') && $assessment->created_by !== Auth::id()) {
+            throw new \Exception('You can only delete your own assessments.');
+        }
+
         DB::beginTransaction();
 
         try {

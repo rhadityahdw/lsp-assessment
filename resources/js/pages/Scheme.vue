@@ -368,12 +368,14 @@ onUnmounted(() => {
                             </div>
                         </div>
                         <div v-else>
-                            <Button 
-                                class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm"
-                                :href="route('schemes.register', selectedScheme.id)"
+                            <Link 
+                                :href="route('pendaftaran')" 
+                                class="w-full"
                             >
+                                <Button class="w-full bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800 text-white shadow-sm">
                                 Daftar Sertifikasi
-                            </Button>
+                                </Button>
+                            </Link>
                         </div>
                     </div>
                 </div>

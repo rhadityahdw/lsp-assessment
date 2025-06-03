@@ -49,9 +49,9 @@ class HandleInertiaRequests extends Middleware
                     'name' => $request->user()->name,
                     'email' => $request->user()->email,
                     'roles' => $request->user()->getRoleNames(),
-                    'permissions' => $request->user()->getAllPermissions()->pluck('name'),
+                    'permissions' => $request->user()->getAllPermissions(),
+                    'profile' => $request->user()->profile()->get(),
                 ] : null,
-
             ],
             'ziggy' => [
                 ...(new Ziggy)->toArray(),

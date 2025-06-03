@@ -5,72 +5,110 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class PermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        app()['cache']->forget('spatie.permission.cache');
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         $permissions = [
             'view profile',
             'edit profile',
             
-            // Scheme permissions
             'view scheme',
             'create scheme',
             'edit scheme',
             'delete scheme',
             
-            // Unit permissions
             'view unit',
             'create unit',
             'edit unit',
             'delete unit',
             
-            // Assessment permissions
             'view assessment',
             'create assessment',
             'edit assessment',
             'delete assessment',
+            'asesor assessment',
             
-            // Pre-assessment permissions
             'view pre-assessment',
             'create pre-assessment',
             'submit pre-assessment',
             'review pre-assessment',
             
-            // Schedule permissions
             'view schedule',
             'create schedule',
             'edit schedule',
             'delete schedule',
             
-            // Certificate permissions
             'view certificate',
             'upload certificate',
+            'edit certificate',
             'download certificate',
+            'delete certificate',
             
-            // Notification permissions
             'view notification',
             'send notification',
             
-            // Dashboard permissions
             'view dashboard',
             'view monitoring'
         ];
 
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web'
+            ]);
         }
 
         // Assign permissions to roles
-        $admin = Role::findByName('admin');
-        $asesi = Role::findByName('asesi');
-        $asesor = Role::findByName('asesor');
+        $admin = Role::findByName('admin', 'web');
+        $asesi = Role::findByName('asesi', 'web');
+        $asesor = Role::findByName('asesor', 'web');
 
         // Admin gets all permissions
-        $admin->givePermissionTo($permissions);
+        $admin->givePermissionTo([
+            'view profile',
+            'edit profile',
+            
+            'view scheme',
+            'create scheme',
+            'edit scheme',
+            'delete scheme',
+            
+            'view unit',
+            'create unit',
+            'edit unit',
+            'delete unit',
+            
+            'view assessment',
+            'edit assessment',
+            'delete assessment',
+            
+            'view pre-assessment',
+            'create pre-assessment',
+            'submit pre-assessment',
+            'review pre-assessment',
+            
+            'view schedule',
+            'create schedule',
+            'edit schedule',
+            'delete schedule',
+            
+            'view certificate',
+            'upload certificate',
+            'edit certificate',
+            'download certificate',
+            'delete certificate',
+            
+            'view notification',
+            'send notification',
+            
+            'view dashboard',
+            'view monitoring'
+        ]);
 
         // Asesi permissions
         $asesi->givePermissionTo([
@@ -91,13 +129,15 @@ class PermissionSeeder extends Seeder
 
         // Asesor permissions
         $asesor->givePermissionTo([
+            'view dashboard',
             'view profile',
             'edit profile',
             'view scheme',
             'view unit',
-            'view assessment',
             'create assessment',
             'edit assessment',
+            'delete assessment',
+            'view assessment',
             'review pre-assessment',
             'view schedule',
             'edit schedule',

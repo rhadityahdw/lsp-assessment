@@ -34,17 +34,20 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        $user = Auth::user();
+        $role = Auth::user()->getRoleNames()->first();
 
-        if ($user->hasRole('admin')) {
-            return redirect()->intended(route('dashboard'));
-        } elseif ($user->hasRole('asesi')) {
-            return redirect()->intended(route('home'));
-        } elseif ($user->hasRole('asesor')) {
-            return redirect()->intended(route('dashboard'));
+        switch ($role) {
+            case 'admin':
+                return redirect()->route('dashboard');
+            case 'asesor':
+                return redirect()->route('dashboard');
+            case 'asesi':
+                return redirect()->route('home');
+            default:
+                Auth::logout();
+                return redirect()->route('login')
+                    ->withErrors(['role' => 'Role tidak dikenali. Hubungi administrator.']);
         }
-
-        return redirect()->intended(route('home'));
     }
 
     /**

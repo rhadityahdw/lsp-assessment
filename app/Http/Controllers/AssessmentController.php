@@ -19,20 +19,30 @@ class AssessmentController extends Controller
     public function __construct(AssessmentService $assessmentService)
     {
         $this->assessmentService = $assessmentService;
+        
+        $this->middleware('permission:view assessment')->only(['index', 'show']);
+        $this->middleware('permission:create assessment')->only(['create', 'store']);
+        $this->middleware('permission:edit assessment')->only(['edit', 'update']);
+        $this->middleware('permission:delete assessment')->only('destroy');
     }
 
     public function index()
     {
         $assessments = $this->assessmentService->getAllAssessments(10);
-
         return Inertia::render('assessments/Index', [
             'assessments' => AssessmentResource::collection($assessments),
+            'can' => [
+                'create' => Auth::user()->can('create assessment'),
+                'edit' => Auth::user()->can('edit assessment'),
+                'delete' => Auth::user()->can('delete assessment'),
+                'view' => Auth::user()->can('view assessment'),
+            ]
         ]);
     }
 
     public function create()
     {
-        $schemes = SchemeResource::collection(Scheme::orderBy('name')->get());
+        $schemes = SchemeResource::collection(Scheme::orderBy('name')->get())->resolve();
 
         return Inertia::render('assessments/Create', [
             'schemes' => $schemes,
@@ -66,7 +76,13 @@ class AssessmentController extends Controller
         }
 
         return Inertia::render('assessments/Show', [
-            'assessment' => $assessment
+            'assessment' => $assessment,
+            'can' => [
+                'edit' => Auth::user()->can('edit assessment') && 
+                         (!Auth::user()->hasRole('asesor') || $assessment->created_by === Auth::id()),
+                'delete' => Auth::user()->can('delete assessment') && 
+                           (!Auth::user()->hasRole('asesor') || $assessment->created_by === Auth::id())
+            ]
         ]);
     }
 
@@ -101,15 +117,5 @@ class AssessmentController extends Controller
             return redirect()->back()
                 ->with('error', $e->getMessage());
         }
-    }
-
-    public function asesorAssessments()
-    {
-        $asesorId = Auth::id();
-        $assessments = $this->assessmentService->getAssessmentsByAsesor($asesorId);
-
-        return Inertia::render('assessments/AsesorAssessments', [
-            'assessments' => $assessments
-        ]);
     }
 }

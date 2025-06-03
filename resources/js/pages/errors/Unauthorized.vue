@@ -1,7 +1,10 @@
 <script setup lang="ts">
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Home } from 'lucide-vue-next';
+import { router } from '@inertiajs/vue3';
+
+const goBack = () => window.history.back();
 </script>
 
 <template>
@@ -16,14 +19,9 @@ import { ArrowLeft, Home } from 'lucide-vue-next';
         </div>
 
         <div class="flex gap-4">
-            <Button>
+            <Button @click="goBack()">
                 <ArrowLeft class="mr-2 h-4 w-4" />
                 Kembali
-            </Button>
-
-            <Button :href="route('home')">
-                <Home class="mr-2 h-4 w-4" />
-                Beranda
             </Button>
         </div>
     </div>

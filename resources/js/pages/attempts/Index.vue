@@ -81,12 +81,8 @@ const tableHeaders = ['Nama Asesi', 'Skema', 'Status', 'Tanggal Pendaftaran', ''
                             Tidak ada pendaftaran yang cocok dengan pencarian Anda.
                         </div>
 
-                        <!-- Tampilkan pesan data kosong -->
-                        <div v-else-if="showEmptyDataMessage" class="text-center py-8 text-gray-500">
-                            Belum ada pendaftaran yang terdaftar. Silakan tunggu asesi melakukan pendaftaran baru.
-                        </div>
-
                         <DataTableComponent
+                            v-else
                             :headers="tableHeaders"
                             :items="props.attempts"
                         >

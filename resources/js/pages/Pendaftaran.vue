@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, useForm, Link } from '@inertiajs/vue3';
 import { useFormStore } from './stores/formStore';
 import { Button } from '@/components/ui/button';
 import PilihSkema from './pendaftaran/PilihSkema.vue';
 import UploadDokumen from './pendaftaran/UploadDokumen.vue';
 import PreAsesmen from './pendaftaran/PreAsesmen.vue';
 import { computed } from 'vue';
-import { Stepper, StepperIndicator, StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper';
+import { Stepper,StepperItem, StepperSeparator, StepperTitle, StepperTrigger } from '@/components/ui/stepper';
 import { Book, DownloadCloud, FileQuestion } from 'lucide-vue-next';
+import { router } from '@inertiajs/vue3';
 
 interface Scheme {
     id: number;
@@ -179,6 +180,16 @@ const submitForm = () => {
         />
 
         <div class="mt-8 flex gap-4 justify-end">
+            <Link
+                v-if="formState.activeStep === 0"
+                :href="route('home')"
+            >
+                <Button
+                    
+                    variant="outline"
+                >Beranda</Button>
+            </Link>
+            
             <Button
                 v-if="formState.activeStep > 0"
                 @click="formState.prevStep"

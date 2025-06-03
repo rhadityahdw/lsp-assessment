@@ -14,7 +14,7 @@ use Inertia\Inertia;
 class ScheduleController extends Controller
 {
     public function __construct(
-        protected ScheduleService $scheduleService
+        protected ScheduleService $scheduleService,
     ) {}
 
     public function index()
