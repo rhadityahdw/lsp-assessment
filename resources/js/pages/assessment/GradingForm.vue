@@ -1,7 +1,5 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { format } from 'date-fns'
-import { id } from 'date-fns/locale'
 import { computed } from 'vue'
 import AppLayout from '@/layouts/AppLayout.vue'
 import PageHeaderComponent from '@/components/PageHeaderComponent.vue'
