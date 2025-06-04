@@ -34,11 +34,15 @@ Route::middleware(['auth', 'role:asesi'])->prefix('asesi')->name('asesi.')->grou
     Route::get('assessments', [AsesiAssessmentController::class, 'index'])->name('assessments.index');
     Route::get('assessments/{schedule}', [AsesiAssessmentController::class, 'show'])->name('assessments.show');
 });
-// Remove duplicate route definitions and ensure all navbar routes exist
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return Inertia::render('Home');
     })->name('home');
+
+    // HAPUS ROUTE INI - Duplikasi
+    // Route::get('dashboard', function () {
+    //     return Inertia::render('Dashboard');
+    // })->middleware('permission:view dashboard')->name('dashboard');
 
     Route::get('skema', function () {
         $schemes = app(SchemeService::class)->getAllSchemes();

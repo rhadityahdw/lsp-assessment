@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAttemptRequest;
 use App\Http\Resources\SchemeResource;
+use App\Models\Attempt;
 use App\Services\AttemptService;
 use App\Services\SchemeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class AttemptController extends Controller
@@ -89,5 +91,21 @@ class AttemptController extends Controller
         }
 
         return redirect()->back()->with('success', 'Status pendaftaran berhasil diperbarui');
+    }
+
+    public function downloadFile(Attempt $attempt)
+    {
+        if ($attempt->user_id !== Auth::id()) {
+            abort(403, 'Unauthorized access to attempt file.');
+        }
+
+        /** @var \Illuminate\Filesystem\FilesystemManager $storage */
+        $storage = Storage::disk('public');
+
+        if ($attempt->file_path && $storage->exists($attempt->file_path)) {
+            return $storage->response($attempt->file_path, basename($attempt->file_path));
+        }
+
+        return redirect()->back()->with('error', 'File sertifikat tidak ditemukan.');
     }
 }

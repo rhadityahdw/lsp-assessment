@@ -7,6 +7,7 @@ use App\Models\PreAssessmentAnswer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class AttemptService
 {
@@ -83,8 +84,20 @@ class AttemptService
     protected function storeFileIfExists(?UploadedFile $file): ?string
     {
         if ($file && $file->isValid()) {
-            $path = $file->store('public/files');
-            return str_replace('public/', '', $path);
+            $userId = request()->input('user_id');
+            $documentType = request()->input('document_type');
+
+            $directory = "files/certificates/{$userId}/{$documentType}";
+            $fileName = Str::uuid() . '.' . $file->getClientOriginalExtension();
+
+            /** @var \Illuminate\Http\UploadedFile $file */
+            $path = $file->storeAs($directory, $fileName, 'public');
+
+            if (!$path) {
+                throw new \Exception('Gagal menyimpan file sertifikat.');
+            }
+
+            return $path;
         }
 
         return null;

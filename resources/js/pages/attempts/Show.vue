@@ -53,6 +53,7 @@ interface Attempt {
     answer: string;
     pre_assessment: {
       id: number;
+      unit_id: number;
       question: string;
     };
   }>;
@@ -81,13 +82,15 @@ const props = withDefaults(defineProps<{ attempt: Attempt }>(), {
   }),
 });
 
+console.log(props.attempt);
+
 const selectedDocument = ref<string | null>(null);
 const isDocumentModalOpen = ref(false);
 
 const updateStatus = (status: string) => {
   router.post(route('attempts.verify', props.attempt.id), { status }, {
     onSuccess: () => {
-      // You can show toast here
+      route('attempts.index')
     },
     onError: (errors) => {
       console.error(errors);
@@ -134,8 +137,17 @@ const getStatusIcon = (status: string) => {
 };
 
 const openDocumentModal = (documentUrl: string) => {
-  selectedDocument.value = documentUrl;
+  selectedDocument.value = `/storage/${documentUrl}`;
   isDocumentModalOpen.value = true;
+};
+
+const downloadDocument = (documentUrl: string, filename: string) => {
+  const link = document.createElement('a');
+  link.href = `/storage/${documentUrl}`;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 const isImageFile = (url: string) => {
@@ -228,7 +240,10 @@ const isPdfFile = (url: string) => {
                   </div>
                   <div class="space-y-1">
                     <span class="text-sm font-medium text-gray-600">Jenis Kelamin:</span>
-                    <p class="text-gray-900">{{ attempt.user.profile?.gender ?? '-' }}</p>
+                    <p class="text-gray-900">
+                      {{ attempt.user.profile?.gender === 'male' ? 'Laki-laki' : 
+                         attempt.user.profile?.gender === 'female' ? 'Perempuan' : '-' }}
+                    </p>
                   </div>
                   <div class="space-y-1">
                     <span class="text-sm font-medium text-gray-600">Tempat Lahir:</span>
@@ -274,34 +289,6 @@ const isPdfFile = (url: string) => {
               </CardContent>
             </Card>
 
-            <!-- Unit Kompetensi -->
-            <Card class="shadow-sm border-0 bg-white">
-              <CardHeader class="bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-t-lg">
-                <CardTitle class="text-xl">Unit Kompetensi</CardTitle>
-              </CardHeader>
-              <CardContent class="p-6">
-                <div class="space-y-4">
-                  <div v-for="(unit, index) in attempt.scheme.units" :key="unit.id" 
-                       class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div class="flex items-start justify-between">
-                      <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-2">
-                          <Badge variant="outline" class="bg-purple-50 text-purple-700 border-purple-200">
-                            Unit {{ index + 1 }}
-                          </Badge>
-                          <Badge variant="secondary" class="bg-gray-100 text-gray-700">
-                            {{ unit.type }}
-                          </Badge>
-                        </div>
-                        <h4 class="font-semibold text-gray-900 mb-1">{{ unit.code }}</h4>
-                        <p class="text-gray-700">{{ unit.name }}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             <!-- Jawaban Pre Asesmen -->
             <Card class="shadow-sm border-0 bg-white">
               <CardHeader class="bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-t-lg">
@@ -309,21 +296,55 @@ const isPdfFile = (url: string) => {
               </CardHeader>
               <CardContent class="p-6">
                 <div class="space-y-4">
-                  <div v-for="(answer, index) in attempt.pre_assessment_answers" :key="answer.id" 
-                       class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div class="flex items-start gap-4">
-                      <div class="flex-shrink-0">
-                        <div class="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-semibold text-sm">
-                          {{ index + 1 }}
+                  <!-- Unit Kompetensi dan Pre Assessment - Digabung -->
+                  <div class="space-y-6">
+                    <div v-for="(unit, unitIndex) in attempt.scheme.units" :key="unit.id" class="bg-white rounded-lg shadow-sm border">
+                      <!-- Unit Header -->
+                      <div class="bg-gradient-to-r from-purple-500 to-violet-600 text-white rounded-t-lg p-4">
+                        <div class="flex items-center gap-3">
+                          <Badge variant="outline" class="bg-white/20 text-white border-white/30">
+                            Unit {{ unitIndex + 1 }}
+                          </Badge>
+                          <div>
+                            <h3 class="font-semibold text-lg">{{ unit.code }}</h3>
+                            <p class="text-purple-100">{{ unit.name }}</p>
+                          </div>
                         </div>
                       </div>
-                      <div class="flex-1">
-                        <h4 class="font-medium text-gray-900 mb-2">{{ answer.pre_assessment.question }}</h4>
-                        <div class="flex items-center gap-2">
-                          <Badge :class="answer.answer == '1' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'">
-                            <component :is="answer.answer == '1' ? CheckCircle : XCircle" class="h-3 w-3 mr-1" />
-                            {{ answer.answer == '1' ? 'Ya' : 'Tidak' }}
-                          </Badge>
+                      
+                      <!-- Pre Assessment Questions untuk Unit ini -->
+                      <div class="p-6">
+                        <h4 class="font-medium text-gray-900 mb-4 flex items-center gap-2">
+                          <span class="w-2 h-2 bg-orange-500 rounded-full"></span>
+                          Pertanyaan Pre Assessment
+                        </h4>
+                        <div class="space-y-3">
+                          <div v-for="(answer, answerIndex) in attempt.pre_assessment_answers.filter(a => a.pre_assessment.unit_id === unit.id)" 
+                               :key="answer.id" 
+                               class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                            <div class="flex items-start gap-4">
+                              <div class="flex-shrink-0">
+                                <div class="w-8 h-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-semibold text-sm">
+                                  {{ answerIndex + 1 }}
+                                </div>
+                              </div>
+                              <div class="flex-1">
+                                <h5 class="font-medium text-gray-900 mb-2">{{ answer.pre_assessment.question }}</h5>
+                                <div class="flex items-center gap-2">
+                                  <Badge :class="answer.answer == '1' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'">
+                                    <component :is="answer.answer == '1' ? CheckCircle : XCircle" class="h-3 w-3 mr-1" />
+                                    {{ answer.answer == '1' ? 'Ya' : 'Tidak' }}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <!-- Jika tidak ada pertanyaan untuk unit ini -->
+                          <div v-if="attempt.pre_assessment_answers.filter(a => a.pre_assessment.unit_id === unit.id).length === 0" 
+                               class="text-center py-8 text-gray-500">
+                            <p>Tidak ada pertanyaan pre assessment untuk unit ini</p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -346,7 +367,6 @@ const isPdfFile = (url: string) => {
                        class="border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
-                        <!-- <component :is="doc.icon" class="h-5 w-5 text-gray-500" /> -->
                         <span class="font-medium text-gray-900">{{ doc.label }}</span>
                       </div>
                       <div v-if="props.attempt[doc.key]" class="flex items-center gap-2">
@@ -354,11 +374,9 @@ const isPdfFile = (url: string) => {
                           <Eye class="h-4 w-4 mr-1" />
                           Lihat
                         </Button>
-                        <Button size="sm" variant="outline" as-child>
-                          <a :href="props.attempt[doc.key]" target="_blank" download>
-                            <Download class="h-4 w-4 mr-1" />
-                            Unduh
-                          </a>
+                        <Button size="sm" variant="outline" @click="downloadDocument(props.attempt[doc.key], `${doc.label}_${attempt.id}`)">
+                          <Download class="h-4 w-4 mr-1" />
+                          Unduh
                         </Button>
                       </div>
                       <Badge v-else variant="secondary" class="text-gray-500">

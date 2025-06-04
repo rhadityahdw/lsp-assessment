@@ -29,6 +29,8 @@ const props = defineProps<{
     }[];
 }>();
 
+console.log(props.schedules);
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',

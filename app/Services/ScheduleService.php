@@ -11,7 +11,7 @@ class ScheduleService
 {
     public function getAllSchedules(): Collection
     {
-        return Schedule::with(['asesor', 'assessment', 'asesiSchedules.asesi'])
+        return Schedule::with(['asesor', 'assessment', 'asesiSchedules'])
             ->orderBy('schedule_time', 'desc')
             ->get();
     }

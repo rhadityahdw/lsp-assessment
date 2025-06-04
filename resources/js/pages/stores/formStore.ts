@@ -50,7 +50,7 @@ export const useFormStore = defineStore('form', {
       this.selectedScheme = scheme
     },
     setDocument({ name, file }: { name: DocumentKey; file: File }) {
-      this.documents[name] = markRaw(file)
+      this.documents[name] = (file)
     },
     setAnswer(preAssessmentId: number, value: boolean) {
       this.answers = {

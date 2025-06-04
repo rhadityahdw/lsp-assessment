@@ -26,15 +26,21 @@ class ScheduleController extends Controller
 
     public function index()
     {
-        $schedules = $this->scheduleService->getAllSchedules();
+        $user = Auth::user();
+
+        if ($user->hasRole('asesor')) {
+            $schedules = $this->scheduleService->getSchedulesByAsesorId($user->id);
+        } elseif ($user->hasRole('admin')) {
+            $schedules = $this->scheduleService->getAllSchedules();
+        }
 
         return Inertia::render('schedules/Index', [
             'schedules' => ScheduleResource::collection($schedules)->resolve(),
             'permissions' => [
-                'create' => Auth::user()->can('create schedule'),
-                'edit' => Auth::user()->can('edit schedule'),
-                'delete' => Auth::user()->can('delete schedule'),
-                'view' => Auth::user()->can('view schedule'),
+                'create' => $user->can('create schedule'),
+                'edit' => $user->can('edit schedule'),
+                'delete' => $user->can('delete schedule'),
+                'view' => $user->can('view schedule'),
             ]
         ]);
     }
