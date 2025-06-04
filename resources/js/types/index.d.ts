@@ -4,6 +4,8 @@ import type { Config } from 'ziggy-js';
 
 export interface Auth {
     user: User;
+    roles: Role;
+    permissions: Permissions;
 }
 
 export interface BreadcrumbItem {
@@ -32,6 +34,7 @@ export interface User {
     email: string;
     email_verified_at: string | null;
     roles: Role[]
+    profile?: Profile | null; // Tambahkan ini
     created_at: string;
     updated_at: string;
 }

@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             SchemeSeeder::class,
             AssessmentSeeder::class,
+            ScheduleSeeder::class,
         ]);
     }
 }

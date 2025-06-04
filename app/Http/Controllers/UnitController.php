@@ -8,20 +8,32 @@ use App\Services\UnitService;
 use App\Models\Unit;
 use App\Models\PreAssessment;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class UnitController extends Controller
 {
     public function __construct(
         protected UnitService $unitService
-    ) {}
+    ) {
+        $this->middleware('permission:view unit')->only(['index', 'show']);
+        $this->middleware('permission:create unit')->only(['create', 'store']);
+        $this->middleware('permission:edit unit')->only(['edit', 'update']);
+        $this->middleware('permission:delete unit')->only(['destroy']);
+    }
 
     public function index()
     {
         $units = Unit::with(['schemes', 'preAssessments'])->get();
 
         return Inertia::render('units/Index', [
-            'units' => $units
+            'units' => $units,
+            'permissions' => [
+                'create' => Auth::user()->can('create unit'),
+                'edit' => Auth::user()->can('edit unit'),
+                'delete' => Auth::user()->can('delete unit'),
+                'view' => Auth::user()->can('view unit'),
+            ]
         ]);
     }
 

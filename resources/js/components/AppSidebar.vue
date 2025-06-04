@@ -4,11 +4,19 @@ import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, User, FilePenLine, CalendarClock, FileText, BookIcon } from 'lucide-vue-next';
+import { Link, usePage } from '@inertiajs/vue3';
+import { BookOpen, Folder, LayoutGrid, User, FilePenLine, CalendarClock, FileText, BookIcon, ClipboardCheck } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
+import { computed } from 'vue';
 
-const mainNavItems: NavItem[] = [
+const page = usePage();
+const userRole = computed(() => {
+    const auth = page.props.auth as { user?: { roles: string[] } };
+    return auth?.user?.roles[0];
+});
+
+// Admin navigation items
+const adminNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: route('dashboard'),
@@ -49,11 +57,66 @@ const mainNavItems: NavItem[] = [
         href: route('admin.certificates.index'),
         icon: FileText,
     }
-    
 ];
 
-const footerNavItems: NavItem[] = [
+// Asesor navigation items
+const asesorNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: route('dashboard'),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Jadwal Saya',
+        href: route('schedules.index'),
+        icon: CalendarClock,
+    },
+    {
+        title: 'Penilaian',
+        href: route('asesor.grading.index'),
+        icon: ClipboardCheck,
+    },
+    {
+        title: 'Asesmen',
+        href: route('assessments.index'),
+        icon: BookOpen,
+    }
 ];
+
+// Asesi navigation items
+const asesiNavItems: NavItem[] = [
+    {
+        title: 'Dashboard',
+        href: route('dashboard'),
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Asesmen Saya',
+        href: route('asesi.assessments.index'),
+        icon: BookOpen,
+    },
+    {
+        title: 'Sertifikat',
+        href: route('asesi.certificates.index'),
+        icon: FileText,
+    }
+];
+
+// Compute navigation items based on user role
+const mainNavItems = computed(() => {
+    switch (userRole.value) {
+        case 'admin':
+            return adminNavItems;
+        case 'asesor':
+            return asesorNavItems;
+        case 'asesi':
+            return asesiNavItems;
+        default:
+            return [];
+    }
+});
+
+const footerNavItems: NavItem[] = [];
 </script>
 
 <template>

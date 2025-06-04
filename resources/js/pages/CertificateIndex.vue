@@ -59,13 +59,15 @@ const formatDate = (date: string) => {
 
     <Navbar />
 
+    <div class="bg-gradient-to-r from-cyan-700 to-blue-900 text-white py-8 md:py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 md:mb-4">Daftar Sertifikat Anda</h1>
+            <p class="text-base md:text-lg max-w-2xl opacity-90">Kelola dan lihat semua sertifikat kompetensi Anda di satu tempat.</p>
+        </div>
+    </div>
+
     <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold text-gray-900 mb-4">Daftar Sertifikat Anda</h1>
-                <p class="text-lg text-gray-600">Kelola dan lihat semua sertifikat kompetensi Anda di satu tempat</p>
-            </div>
-
             <div v-if="certificates && certificates.length > 0" 
                  class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 <Card v-for="certificate in certificates" 

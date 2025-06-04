@@ -26,8 +26,8 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: route('dashboard'),
     },
     {
-        title: 'Skema',
-        href: route('schemes.index'),
+        title: 'Pendaftaran',
+        href: route('attempts.index'),
     }
 ];
 

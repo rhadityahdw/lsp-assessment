@@ -4,18 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreScheduleRequest;
+use App\Http\Requests\UpdateScheduleRequest;
 use App\Http\Resources\ScheduleResource;
-use App\Models\Scheme;
+use App\Models\Assessment;
 use App\Models\User;
 use App\Services\ScheduleService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class ScheduleController extends Controller
 {
     public function __construct(
-        protected ScheduleService $scheduleService,
-    ) {}
+        protected ScheduleService $scheduleService
+    ) {
+        $this->middleware('permission:view schedule')->only(['index', 'show']);
+        $this->middleware('permission:create schedule')->only(['create', 'store']);
+        $this->middleware('permission:edit schedule')->only(['edit', 'update']);
+        $this->middleware('permission:delete schedule')->only(['destroy']);
+    }
 
     public function index()
     {
@@ -23,17 +30,23 @@ class ScheduleController extends Controller
 
         return Inertia::render('schedules/Index', [
             'schedules' => ScheduleResource::collection($schedules)->resolve(),
+            'permissions' => [
+                'create' => Auth::user()->can('create schedule'),
+                'edit' => Auth::user()->can('edit schedule'),
+                'delete' => Auth::user()->can('delete schedule'),
+                'view' => Auth::user()->can('view schedule'),
+            ]
         ]);
     }
 
     public function create()
     {
-        $schemes = Scheme::all();
+        $assessments = Assessment::select('id', 'name')->get();
         $asesors = User::role('asesor')->select('id', 'name')->get();
-        $asesis = User::role('asesi')->select('id', 'name')->get();    
+        $asesis = User::role('asesi')->select('id', 'name')->get();
 
         return Inertia::render('schedules/Create', [
-            'schemes' => $schemes,
+            'assessments' => $assessments,
             'asesors' => $asesors,
             'asesis' => $asesis,
         ]);
@@ -41,26 +54,76 @@ class ScheduleController extends Controller
 
     public function store(StoreScheduleRequest $request)
     {
-        $schedule = $this->scheduleService->createSchedule($request->validated());
+        try {
+            $this->scheduleService->createSchedule($request->validated());
 
-        return redirect()->json([
-            'message' => 'Jadwal berhasil ditambahkan',
-            'schedule' => new ScheduleResource($schedule),
-        ]);
+            return redirect()->route('schedules.index')
+                ->with('success', 'Jadwal berhasil dibuat');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
+    }
+
+    public function show(int $id)
+    {
+        try {
+            $schedule = $this->scheduleService->getScheduleById($id);
+            
+            return Inertia::render('schedules/Show', [
+                'schedule' => new ScheduleResource($schedule),
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('schedules.index')
+                ->with('error', 'Jadwal tidak ditemukan');
+        }
     }
 
     public function edit($id)
     {
-        return Inertia::render('schedules/Edit');
+        try {
+            $schedule = $this->scheduleService->getScheduleById($id);
+            $assessments = Assessment::select('id', 'name')->get();
+            $asesors = User::role('asesor')->select('id', 'name')->get();
+            $asesis = User::role('asesi')->select('id', 'name')->get();
+
+            return Inertia::render('schedules/Edit', [
+                'schedule' => new ScheduleResource($schedule),
+                'assessments' => $assessments,
+                'asesors' => $asesors,
+                'asesis' => $asesis,
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->route('schedules.index')
+                ->with('error', 'Jadwal tidak ditemukan');
+        }
     }
 
-    public function show($id)
+    public function update(UpdateScheduleRequest $request, $id)
     {
-        return Inertia::render('schedules/Show');
+        try {
+            $this->scheduleService->updateSchedule($id, $request->validated());
+            
+            return redirect()->route('schedules.index')
+                ->with('success', 'Jadwal berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
     }
 
     public function destroy($id)
     {
-        return redirect()->route('schedules.index')->with('success', 'Schedule deleted successfully');
+        try {
+            $this->scheduleService->deleteSchedule($id);
+            
+            return redirect()->route('schedules.index')
+                ->with('success', 'Jadwal berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', $e->getMessage());
+        }
     }
 }

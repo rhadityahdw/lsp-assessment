@@ -7,13 +7,19 @@ use App\Models\Role;
 use App\Http\Requests\UserRequest;
 use App\Services\UserService;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class UserController extends Controller
 {
     public function __construct(
         protected UserService $userService
-    ) {}
+    ) {
+        $this->middleware('permission:view user')->only(['index', 'show']);
+        $this->middleware('permission:create user')->only(['create', 'store']);
+        $this->middleware('permission:edit user')->only(['edit', 'update']);
+        $this->middleware('permission:delete user')->only(['destroy']);
+    }
 
     public function index()
     {
@@ -21,6 +27,11 @@ class UserController extends Controller
 
         return Inertia::render('users/Index', [
             'users' => $users,
+            'permissions' => [
+                'create' => Auth::user()->can('view user'), // Admin only
+                'edit' => Auth::user()->can('edit user'), // Admin only
+                'delete' => Auth::user()->can('delete user'), // Admin only
+            ]
         ]);
     }
 

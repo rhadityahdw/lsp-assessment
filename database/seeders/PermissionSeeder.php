@@ -13,6 +13,7 @@ class PermissionSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        // Tambahkan permission baru untuk user management
         $permissions = [
             'view profile',
             'edit profile',
@@ -53,7 +54,11 @@ class PermissionSeeder extends Seeder
             'send notification',
             
             'view dashboard',
-            'view monitoring'
+            'view monitoring',
+            'view user',
+            'create user', 
+            'edit user',
+            'delete user',
         ];
 
         foreach ($permissions as $permission) {
@@ -69,9 +74,15 @@ class PermissionSeeder extends Seeder
         $asesor = Role::findByName('asesor', 'web');
 
         // Admin gets all permissions
+        // Update admin permissions
         $admin->givePermissionTo([
             'view profile',
             'edit profile',
+
+            'view user',
+            'create user',
+            'edit user',
+            'delete user',
             
             'view scheme',
             'create scheme',
@@ -114,37 +125,46 @@ class PermissionSeeder extends Seeder
         $asesi->givePermissionTo([
             'view profile',
             'edit profile',
+
             'view scheme',
+
             'view unit',
+
             'view assessment',
+
             'view pre-assessment',
             'create pre-assessment',
             'submit pre-assessment',
+
             'view schedule',
+
             'view certificate',
             'download certificate',
+
             'view notification',
-            'view dashboard'
         ]);
 
         // Asesor permissions
         $asesor->givePermissionTo([
-            'view dashboard',
             'view profile',
             'edit profile',
-            'view scheme',
-            'view unit',
+
             'create assessment',
             'edit assessment',
             'delete assessment',
             'view assessment',
+
             'review pre-assessment',
+
             'view schedule',
             'edit schedule',
+
             'view certificate',
             'upload certificate',
+
             'view notification',
             'send notification',
+            
             'view dashboard',
             'view monitoring'
         ]);

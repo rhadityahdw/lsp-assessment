@@ -9,17 +9,31 @@ use App\Models\Unit;
 use App\Services\SchemeService;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
 
 class SchemeController extends Controller
 {
     public function __construct(
         protected SchemeService $schemeService
-    ) {}
+    ) {
+        $this->middleware('permission:view scheme')->only(['index', 'show']);
+        $this->middleware('permission:create scheme')->only(['create', 'store']);
+        $this->middleware('permission:edit scheme')->only(['edit', 'update']);
+        $this->middleware('permission:delete scheme')->only(['destroy']);
+    }
 
     public function index()
     {
         $schemes = $this->schemeService->getAllSchemes();
-        return inertia('schemes/Index', compact('schemes'));
+        return inertia('schemes/Index', [
+            'schemes' => $schemes,
+            'permissions' => [
+                'create' => Auth::user()->can('create scheme'),
+                'edit' => Auth::user()->can('edit scheme'),
+                'delete' => Auth::user()->can('delete scheme'),
+                'view' => Auth::user()->can('view scheme'),
+            ]
+        ]);
     }
 
     public function create()

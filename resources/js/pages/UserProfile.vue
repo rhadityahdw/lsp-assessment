@@ -107,12 +107,16 @@ const handleUpdate = (form: any) => {
 
     <Navbar />
 
+    <div class="bg-gradient-to-r from-cyan-700 to-blue-900 text-white py-8 md:py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 md:mb-4">Profil Pribadi</h1>
+            <p class="text-base md:text-lg max-w-2xl opacity-90">Kelola informasi pribadi dan data perusahaan Anda untuk keperluan sertifikasi profesional.</p>
+        </div>
+    </div>
+
     <div class="min-h-screen bg-gray-50">
         <div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             <Card>
-                <CardHeader>
-                    <CardTitle class="text-2xl font-bold">Profil Pengguna</CardTitle>
-                </CardHeader>
                 <form @submit.prevent="(props.profile ? handleUpdate(form) : handleSubmit(form))">
                     <CardContent>
                         <!-- Informasi Pribadi -->

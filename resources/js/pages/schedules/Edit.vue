@@ -13,25 +13,37 @@ import DatePicker from '@/components/DatePicker.vue';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useToast } from 'vue-toastification';
 
 const toast = useToast();
 
-defineProps<{
+const props = defineProps<{
+    schedule: {
+        id: number;
+        assessment_id: number;
+        asesor_id: number;
+        schedule_time: string;
+        location: string;
+        status: string;
+        asesis: { id: number; name: string; pivot?: { score?: number; notes?: string } }[];
+    };
     assessments: { id: number; name: string }[];
     asesors: { id: number; name: string }[];
     asesis: { id: number; name: string }[];
 }>();
 
+console.log(props.schedule)
+
 const form = useForm({
-    assessment_id: '',
-    asesor_id: '',
-    schedule_time: '',
-    location: '',
-    status: 'scheduled',
-    asesis: [] as number[]
+    assessment_id: props.schedule.assessment_id,
+    asesor_id: props.schedule.asesor_id,
+    schedule_time: props.schedule.schedule_time,
+    location: props.schedule.location,
+    status: props.schedule.status,
+    asesis: props.schedule.asesis.map(asesi => asesi.id),
 });
+
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -43,12 +55,16 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: route('schedules.index')
     },
     {
-        title: 'Tambah Jadwal',
-        href: route('schedules.create')
+        title: 'Edit Jadwal',
+        href: route('schedules.edit', props.schedule.id)
     }
 ];
 
 const selectedAsesis = ref<number[]>([]);
+
+onMounted(() => {
+    selectedAsesis.value = props.schedule.asesis.map(asesi => asesi.id);
+});
 
 const toggleAsesi = (asesiId: number) => {
     const index = selectedAsesis.value.indexOf(asesiId);
@@ -67,12 +83,12 @@ const isAsesiSelected = (asesiId: number) => {
 };
 
 const submitForm = () => {
-    form.post(route('schedules.store'), {
+    form.put(route('schedules.update', props.schedule.id), {
         onSuccess: () => {
-            toast.success('Jadwal berhasil ditambahkan');
+            toast.success('Jadwal berhasil diperbarui');
         },
         onError: (errors: any) => {
-            toast.error('Terjadi kesalahan saat menambahkan jadwal');
+            toast.error('Terjadi kesalahan saat memperbarui jadwal');
             console.log('Jadwal errors:', errors);
         }
     });
@@ -80,13 +96,13 @@ const submitForm = () => {
 </script>
 
 <template>
-    <Head title="Tambah Jadwal" />
+    <Head title="Edit Jadwal" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="py-6 md:py-12">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:max-w-7xl lg:px-8">
                 <Card>
-                    <PageHeaderComponent title="Tambah Jadwal" />
+                    <PageHeaderComponent title="Edit Jadwal" />
                     <form @submit.prevent="submitForm">
                         <CardContent class="space-y-6">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -190,7 +206,7 @@ const submitForm = () => {
                                     </Button>
                                 </Link>
                                 <Button type="submit" :disabled="form.processing">
-                                    {{ form.processing ? 'Menyimpan...' : 'Simpan Jadwal' }}
+                                    {{ form.processing ? 'Menyimpan...' : 'Perbarui Jadwal' }}
                                 </Button>
                             </div>
                         </CardContent>

@@ -14,7 +14,10 @@ class ProfileController extends Controller
 {
     public function __construct(
         protected ProfileService $profileService
-    ) {}
+    ) {
+        $this->middleware('permission:view profile')->only(['index']);
+        $this->middleware('permission:edit profile')->only(['store', 'update']);
+    }
 
     public function index()
     {

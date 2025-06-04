@@ -29,6 +29,8 @@ console.log('Schemes:', props.schemes);
 const { auth }: any = usePage().props;
 const hasProfile = computed(() => auth.user?.profile);
 
+console.log(hasProfile.value);
+
 // Modal state
 const showRegistrationModal = ref(false);
 const selectedScheme = ref<Scheme | null>(null);
@@ -116,7 +118,18 @@ const getUnitCount = (scheme: any) => {
 };
 
 // Registration modal functions
+// Tambahkan fungsi baru untuk melihat detail
+const openSchemeDetail = (scheme: Scheme) => {
+    selectedScheme.value = scheme;
+    showRegistrationModal.value = true;
+};
+
+// Fungsi registrasi tetap sama
 const openRegistrationModal = (scheme: Scheme) => {
+    if (!hasProfile.value) {
+        // Bisa tambahkan notifikasi atau redirect ke profil
+        return;
+    }
     selectedScheme.value = scheme;
     showRegistrationModal.value = true;
 };
@@ -284,7 +297,7 @@ onUnmounted(() => {
                             >
                                 {{ hasProfile ? 'Daftar Sertifikasi' : 'Lengkapi Profil Terlebih Dahulu' }}
                             </Button>
-                            <Button variant="outline" class="w-full" @click="openRegistrationModal(scheme)">
+                            <Button variant="outline" class="w-full" @click="openSchemeDetail(scheme)">
                                 <BookOpen class="h-4 w-4 mr-2" />
                                 Lihat Detail Skema
                             </Button>

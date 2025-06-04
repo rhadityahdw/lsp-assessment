@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('asesi_schedule', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('asesi_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('schedule_id')->constrained('schedules')->cascadeOnDelete();
-            $table->integer('score');
-            $table->text('notes');
+            $table->integer('score')->nullable();
+            $table->text('notes')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

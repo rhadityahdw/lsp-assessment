@@ -17,7 +17,7 @@ defineProps<{
     </Avatar>
     <div class="hidden sm:block text-left">
       <p class="text-sm font-medium text-gray-700 leading-tight">{{ user?.name }}</p>
-      <p class="text-xs text-cyan-600">{{ user?.roles[0] }}</p>
+      <p class="text-xs text-cyan-600">{{ user?.roles?.[0] || 'User' }}</p>
     </div>
   </div>
 </template>
