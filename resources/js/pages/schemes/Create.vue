@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
@@ -11,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Card, CardAction, CardContent, CardFooter, CardHeader, CardTitle
 } from '@/components/ui/card';
-import { ArrowLeft, Trash2 } from 'lucide-vue-next';
 import { BreadcrumbItem, Unit } from '@/types';
 
 const props = defineProps<{
@@ -55,8 +53,27 @@ const handleUnitSelection = (unitId: number, checked: boolean): void => {
     : form.unit_ids.filter((id: number) => id !== unitId)
 };
 
-const submit = (): void => {
-  form.post(route('schemes.store'));
+const submit = () => {
+  console.log('Form data:', form);
+  
+  // Validasi basic sebelum submit
+  if (!form.code || !form.name || !form.type) {
+    console.error('Required fields are missing');
+    return;
+  }
+  
+  form.post(route('schemes.store'), {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: (response) => {
+            console.log('Success:', response);
+            form.reset();
+        },
+        onError: (errors) => {
+            // form.setErrors(errors); // Uncomment ini untuk menampilkan error
+            console.error('Submission errors:', errors);
+        },
+  });
 };
 </script>
 

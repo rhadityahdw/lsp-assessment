@@ -55,7 +55,7 @@ class SchemeController extends Controller
                 
         } catch (\Exception $e) {
             Log::error('Scheme creation failed: ' . $e->getMessage());
-            return back()->with('error', 'Failed to create scheme');
+            return redirect()->back()->with('error', 'Failed to create scheme');
         }
     }
 

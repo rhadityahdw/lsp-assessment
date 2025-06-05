@@ -127,14 +127,13 @@ class UnitService
     {
         $records = array_map(function ($pre_assessment) use ($unit) {
             // Validasi struktur data
-            if (empty($pre_assessment['question']) || empty($pre_assessment['expected_answer'])) {
+            if (empty($pre_assessment['question'])) {
                 throw new InvalidArgumentException('Invalid pre-assessment data');
             }
 
             return [
                 'unit_id' => $unit->id,
                 'question' => $pre_assessment['question'],
-                'expected_answer' => $pre_assessment['expected_answer'],
                 'created_at' => now(),
                 'updated_at' => now(),
             ];

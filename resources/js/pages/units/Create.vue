@@ -36,7 +36,6 @@ const form = useForm({
     pre_assessments: [
         {
             question: '',
-            expected_answer: '',
         }
     ]
 });
@@ -44,7 +43,6 @@ const form = useForm({
 const addPreAssessment = () => {
     form.pre_assessments.push({
         question: '',
-        expected_answer: '',
     });
 };
 
@@ -55,7 +53,6 @@ const removePreAssessment = (index: number) => {
 };
 
 const submit = () => {
-    console.log('Form data:', form);
     form.post(route('units.store'));
 };
 </script>
@@ -125,20 +122,6 @@ const submit = () => {
                                             required
                                         />
                                         <InputError :message="(form.errors as any)[`pre_assessments.${index}.question`]"/>
-                                    </div>
-                                    
-                                    <div class="space-y-2">
-                                        <Label :for="`expected_answer-${index}`">Jawaban yang Diharapkan</Label>
-                                        <Select v-model="pre_assessment.expected_answer">
-                                            <SelectTrigger :id="`expected_answer-${index}`">
-                                                <SelectValue placeholder="Pilih jawaban" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="yes">Ya</SelectItem>
-                                                <SelectItem value="no">Tidak</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError :message="(form.errors as any)[`pre_assessments.${index}.expected_answer`]"/>
                                     </div>
                                 </div>
                             </div>

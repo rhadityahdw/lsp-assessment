@@ -7,7 +7,9 @@ use App\Http\Requests\StoreCertificateRequest;
 use App\Http\Resources\CertificateResource;
 use App\Http\Resources\SchemeResource;
 use App\Http\Resources\UserResource;
+use App\Models\AsesiSchedule;
 use App\Models\Certificate;
+use App\Models\Schedule;
 use App\Models\Scheme;
 use App\Models\User;
 use App\Services\CertificateService;
@@ -44,9 +46,21 @@ class AdminCertificateController extends Controller
 
     public function create()
     {
-        $users = UserResource::collection(User::whereHas('roles', function ($query) {
-            $query->where('name', 'asesi');
-        })->orderBy('name')->get());
+        // Filter asesi yang memiliki asesi_schedule dengan status approved
+        $users = UserResource::collection(
+            User::whereHas('roles', function ($query) {
+                $query->where('name', 'asesi');
+            })
+            ->whereHas('asesiSchedules', function ($query) {
+                $query->where('status', AsesiSchedule::STATUS_APPROVED)
+                      ->whereHas('schedule', function ($scheduleQuery) {
+                          $scheduleQuery->where('status', Schedule::STATUS_COMPLETED);
+                      });
+            })
+            ->orderBy('name')
+            ->get()
+        );
+        
         $schemes = SchemeResource::collection(Scheme::orderBy('name')->get());
 
         return Inertia::render('Certificates/Create', [

@@ -22,7 +22,6 @@ class UnitRequest extends FormRequest
             'name' => 'required|string|max:255',
             'pre_assessments' => 'array',
             'pre_assessments.*.question' => 'required|string|max:255',
-            'pre_assessments.*.expected_answer' => 'required|string',
         ];
     }
 }

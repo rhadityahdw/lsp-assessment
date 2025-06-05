@@ -29,7 +29,7 @@ class ScheduleController extends Controller
         $user = Auth::user();
 
         if ($user->hasRole('asesor')) {
-            $schedules = $this->scheduleService->getSchedulesByAsesorId($user->id);
+            $schedules = $this->scheduleService->getSchedulesByAsesor($user->id);
         } elseif ($user->hasRole('admin')) {
             $schedules = $this->scheduleService->getAllSchedules();
         }
@@ -49,7 +49,9 @@ class ScheduleController extends Controller
     {
         $assessments = Assessment::select('id', 'name')->get();
         $asesors = User::role('asesor')->select('id', 'name')->get();
-        $asesis = User::role('asesi')->select('id', 'name')->get();
+        $asesis = User::role('asesi')->whereHas('attempts', function ($query) {
+            $query->where('status', 'approved');
+        })->select('id', 'name')->get();
 
         return Inertia::render('schedules/Create', [
             'assessments' => $assessments,
@@ -77,8 +79,18 @@ class ScheduleController extends Controller
         try {
             $schedule = $this->scheduleService->getScheduleById($id);
             
+            // Load detailed assessment results for admin
+            if (Auth::user()->hasRole('admin')) {
+                $schedule->load([
+                    'asesiSchedules.asesi.profile',
+                    'assessment.scheme',
+                    'asesor'
+                ]);
+            }
+            
             return Inertia::render('schedules/Show', [
                 'schedule' => new ScheduleResource($schedule),
+                'canViewResults' => Auth::user()->hasRole('admin') || Auth::user()->hasRole('asesor')
             ]);
         } catch (\Exception $e) {
             return redirect()->route('schedules.index')
@@ -92,7 +104,14 @@ class ScheduleController extends Controller
             $schedule = $this->scheduleService->getScheduleById($id);
             $assessments = Assessment::select('id', 'name')->get();
             $asesors = User::role('asesor')->select('id', 'name')->get();
-            $asesis = User::role('asesi')->select('id', 'name')->get();
+            
+            // Filter asesi yang memiliki attempt dengan status approved
+            $asesis = User::role('asesi')
+                ->whereHas('attempts', function ($query) {
+                    $query->where('status', 'approved');
+                })
+                ->select('id', 'name')
+                ->get();
 
             return Inertia::render('schedules/Edit', [
                 'schedule' => new ScheduleResource($schedule),

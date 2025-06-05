@@ -57,7 +57,6 @@ class UnitController extends Controller
                 PreAssessment::create([
                     'unit_id' => $unit->id,
                     'question' => $assessment['question'],
-                    'expected_answer' => $assessment['expected_answer'],
                 ]);
             }
         });

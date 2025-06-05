@@ -10,7 +10,13 @@ class Scheme extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'code',
+        'name',
+        'type',
+        'document_path',
+        'summary',
+    ];
 
     /**
      * Get the units for the scheme.

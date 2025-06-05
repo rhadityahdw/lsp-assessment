@@ -26,6 +26,8 @@ class SchemeService
         return DB::transaction(function () use ($data, $unitIds) {
             $scheme = Scheme::create($data);
 
+            // dd($scheme); // Comment atau hapus baris ini
+
             if (!empty($unitIds)) {
                 $existingUnitIds = Unit::whereIn('id', $unitIds)->pluck('id')->toArray();
                 if (count($existingUnitIds) !== count($unitIds)) {

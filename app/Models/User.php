@@ -54,4 +54,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Certificate::class);
     }
+
+    public function attempts()
+    {
+        return $this->hasMany(Attempt::class);
+    }
+
+    public function asesiSchedules()
+    {
+        return $this->hasMany(AsesiSchedule::class, 'asesi_id');
+    }
 }

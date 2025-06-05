@@ -22,6 +22,9 @@ const handleSubmit = (form: any) => {
         onSuccess: () => {
             form.reset();
         },
+        onError: (errors: any) => {
+            form.setErrors(errors);
+        },
     });
 };
 </script>

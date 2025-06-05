@@ -98,7 +98,7 @@ class ScheduleService
     public function getSchedulesByAsesor(int $asesorId): Collection
     {
         return Schedule::where('asesor_id', $asesorId)
-            ->with(['assessment', 'asesis'])
+            ->with(['asesor', 'assessment', 'asesiSchedules'])
             ->orderBy('schedule_time', 'asc')
             ->get();
     }

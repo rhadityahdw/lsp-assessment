@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminAssessmentResultController;
 use App\Http\Controllers\AdminCertificateController;
 use App\Http\Controllers\AsesiAssessmentController;
 use App\Http\Controllers\AsesiCertificateController;
@@ -98,4 +99,13 @@ Route::prefix('assessment/grading')->name('assessment.grading.')->group(function
     Route::get('/{schedule}', [AssessmentGradingController::class, 'show'])->name('show');
     Route::patch('/{asesiSchedule}', [AssessmentGradingController::class, 'updateAsesiResult'])->name('update');
     Route::patch('/{schedule}/multiple', [AssessmentGradingController::class, 'updateMultipleResults'])->name('update-multiple');
+});
+// Admin Assessment Results Routes
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('assessment-results', [AdminAssessmentResultController::class, 'index'])
+        ->name('assessment-results.index');
+    Route::get('assessment-results/{schedule}', [AdminAssessmentResultController::class, 'show'])
+        ->name('assessment-results.show');
+    Route::get('assessment-results/export', [AdminAssessmentResultController::class, 'export'])
+        ->name('assessment-results.export');
 });

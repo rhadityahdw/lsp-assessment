@@ -7,6 +7,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Attempt extends Model
 {
+    const STATUS_SUBMITTED = 'submitted';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
+    
     protected $fillable = [
         'user_id',
         'scheme_id',
@@ -31,5 +35,15 @@ class Attempt extends Model
     public function preAssessmentAnswers()
     {
         return $this->hasMany(PreAssessmentAnswer::class);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
+    
+    public function isApproved()
+    {
+        return $this->status === self::STATUS_APPROVED;
     }
 }

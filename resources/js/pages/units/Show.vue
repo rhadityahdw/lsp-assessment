@@ -83,14 +83,14 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         <div class="font-medium">Pertanyaan #{{ index + 1 }}</div>
                                         <p class="text-gray-700">{{ assessment.question }}</p>
                                     </div>
-                                    <div class="ml-4 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+                                    <!-- <div class="ml-4 flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
                                         <span class="text-sm font-medium">Jawaban yang diharapkan:</span>
                                         <span class="flex items-center gap-1 font-medium">
                                             <CheckCircle v-if="assessment.expected_answer === 'yes'" class="h-4 w-4 text-green-500" />
                                             <XCircle v-else class="h-4 w-4 text-red-500" />
                                             {{ assessment.expected_answer === 'yes' ? 'Ya' : 'Tidak' }}
                                         </span>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
                         </div>
